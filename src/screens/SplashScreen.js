@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import RosterioMark from "../components/RosterioMark";
 import { LinearGradient } from "expo-linear-gradient";
 import { GlassView, isLiquidGlassAvailable } from "../utils/glassEffect";
 import glassTheme from "../theme/glassTheme";
@@ -32,7 +33,7 @@ const SplashScreen = () => {
         <View style={styles.specular} pointerEvents="none" />
 
         <View style={styles.logoCircle}>
-          <Ionicons name="briefcase" size={36} color={glassTheme.colors.primary} />
+          <RosterioMark size={36} color={glassTheme.colors.primary} />
         </View>
 
         <Text style={styles.title}>Rosterio</Text>

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import RosterioMark from "../../components/RosterioMark";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../../context/AuthContext";
 import { formatRole } from "../../utils/roleFormatter";
@@ -102,7 +103,7 @@ const AccountSelectScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerIcon}>
-            <Ionicons name="briefcase" size={28} color={glassTheme.colors.primary} />
+            <RosterioMark size={28} color={glassTheme.colors.primary} />
           </View>
           <Text style={styles.title}>Select Account</Text>
           <Text style={styles.subtitle}>Choose which account to manage</Text>

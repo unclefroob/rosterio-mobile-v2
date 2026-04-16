@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import RosterioMark from "../../components/RosterioMark";
 import { LinearGradient } from "expo-linear-gradient";
 import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import { useAuth } from "../../context/AuthContext";
@@ -78,7 +79,7 @@ const LoginScreen = ({ navigation }) => {
         {/* Logo section */}
         <View style={styles.logoSection}>
           <View style={styles.logoSquare}>
-            <Ionicons name="briefcase" size={38} color={glassTheme.colors.primary} />
+            <RosterioMark size={38} color={glassTheme.colors.primary} />
           </View>
           <Text style={styles.appName}>Rosterio</Text>
           <Text style={styles.tagline}>Sign in to your account</Text>
