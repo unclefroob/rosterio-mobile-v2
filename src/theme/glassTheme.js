@@ -28,8 +28,8 @@ export const glassTheme = {
 
   // Semantic colors
   colors: {
-    primary: "#007AFF",         // iOS system blue — main CTA, active states
-    primaryDark: "#0040DD",
+    primary: "#111111",         // Ink — main CTA, active states
+    primaryDark: "#333333",
     secondary: "#5856D6",       // Apple purple
 
     success: "#30D158",         // iOS 26 green
@@ -46,18 +46,18 @@ export const glassTheme = {
     },
 
     background: {
-      // Soft blue-to-lavender: gives glass surfaces a tinted background to blur through
-      primary: "#ECF4FF",
-      screen: "#ECF4FF",
+      // Subtle periwinkle-white: gives glass surfaces a tinted background to blur through
+      primary: "#F0F4FF",
+      screen: "#F0F4FF",
       secondary: "rgba(255, 255, 255, 0.92)",
       tertiary: "#E8ECFA",
     },
 
     // Screen gradient stops (use with expo-linear-gradient)
     gradients: {
-      screen:  ["#EAF2FF", "#EDE8FF"],          // Blue → lavender
-      vivid:   ["#E0EDFF", "#EAE0FF", "#F5E0FF"], // Blue → purple → pink
-      auth:    ["#E8F0FF", "#EDE8FF", "#F0E8FF"], // Soft auth screen
+      screen:  ["#EEF2FF", "#F0EEFF"],          // Periwinkle → lavender
+      vivid:   ["#EEF2FF", "#EDE8FF", "#ECE8FF"], // Periwinkle → lavender
+      auth:    ["#EEF2FF", "#EDE8FF", "#EBE8F0"], // Soft auth screen
     },
 
     // Tinted icon container washes
@@ -140,6 +140,16 @@ export const glassTheme = {
     opacity: 0.11,
     radius: 14,
     elevation: 4,
+  },
+
+  // Typography — DM Sans (matches shiftos web)
+  typography: {
+    fontFamily: {
+      regular:  "DMSans_400Regular",
+      medium:   "DMSans_500Medium",
+      semiBold: "DMSans_600SemiBold",
+      bold:     "DMSans_700Bold",
+    },
   },
 
   // Border defaults

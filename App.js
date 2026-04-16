@@ -3,6 +3,7 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useFonts, DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from "@expo-google-fonts/dm-sans";
 import { AuthContextProvider, useAuth } from "./src/context/AuthContext";
 import { PlanContextProvider, usePlan } from "./src/context/PlanContext";
 import { ToastProvider } from "./src/components/Toast";
@@ -25,7 +26,7 @@ const AppTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "#F5E0FF", // matches vivid gradient end — eliminates the white safe-area flash
+    background: "#F0F4FF", // matches screen background — eliminates the white safe-area flash
   },
 };
 
@@ -41,6 +42,7 @@ const glassHeaderOptions = {
   },
   headerTintColor: glassTheme.colors.primary,
   headerTitleStyle: {
+    fontFamily: "DMSans_600SemiBold",
     fontWeight: "600",
     color: glassTheme.colors.text.primary,
     fontSize: 17,
@@ -148,6 +150,15 @@ function RootNavigator() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
+  });
+
+  if (!fontsLoaded) return null;
+
   return (
     <SafeAreaProvider>
       <AuthContextProvider>

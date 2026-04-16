@@ -207,7 +207,7 @@ const MarketplaceScreen = ({ navigation }) => {
           <View style={styles.headerRight}>
             {isFullyAssigned && (
               <View style={styles.filledBadge}>
-                <Ionicons name="checkmark-circle" size={12} color="#166534" />
+                <Ionicons name="checkmark-circle" size={12} color={glassTheme.colors.success} />
                 <Text style={styles.filledBadgeText}>Filled</Text>
               </View>
             )}
@@ -300,21 +300,21 @@ const MarketplaceScreen = ({ navigation }) => {
             if (claimStatus === "approved") {
               return (
                 <View style={styles.claimStatusContainer}>
-                  <Ionicons name="checkmark-circle" size={16} color="#22c55e" />
+                  <Ionicons name="checkmark-circle" size={16} color={glassTheme.colors.success} />
                   <Text style={styles.claimStatusText}>Claim Approved</Text>
                 </View>
               );
             } else if (claimStatus === "pending") {
               return (
                 <View style={styles.claimStatusContainer}>
-                  <Ionicons name="time" size={16} color="#f59e0b" />
+                  <Ionicons name="time" size={16} color={glassTheme.colors.warning} />
                   <Text style={styles.claimStatusText}>Claim Pending</Text>
                 </View>
               );
             } else if (claimStatus === "rejected") {
               return (
                 <View style={styles.claimStatusContainer}>
-                  <Ionicons name="close-circle" size={16} color="#ef4444" />
+                  <Ionicons name="close-circle" size={16} color={glassTheme.colors.danger} />
                   <Text style={styles.claimStatusText}>Claim Rejected</Text>
                 </View>
               );
@@ -351,7 +351,7 @@ const MarketplaceScreen = ({ navigation }) => {
       <MaterialCommunityIcons
         name="storefront-outline"
         size={48}
-        color="#d1d5db"
+        color={glassTheme.colors.text.tertiary}
       />
       <Text style={styles.emptyStateText}>No shifts available</Text>
       <Text style={styles.emptyStateSubtext}>
@@ -702,8 +702,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   claimButtonUrgent: {
-    backgroundColor: "#ef4444",
-    shadowColor: "#ef4444",
+    backgroundColor: glassTheme.colors.danger,
+    shadowColor: glassTheme.colors.danger,
   },
   claimButtonDisabled: {
     backgroundColor: "rgba(0,0,0,0.10)",

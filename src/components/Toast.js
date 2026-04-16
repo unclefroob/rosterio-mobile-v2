@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Animated, Text, StyleSheet, SafeAreaView } from 'react-native';
+import glassTheme from '../theme/glassTheme';
 
 let toastRef = null;
 
@@ -37,11 +38,11 @@ export const ToastProvider = ({ children }) => {
   };
 
   const bgColor = {
-    success: '#16a34a',
-    error: '#dc2626',
-    warning: '#d97706',
-    default: '#374151',
-  }[type] || '#374151';
+    success: glassTheme.colors.success,
+    error: glassTheme.colors.danger,
+    warning: glassTheme.colors.warning,
+    default: glassTheme.colors.primary,
+  }[type] || glassTheme.colors.primary;
 
   if (!visible) return <>{children}</>;
 

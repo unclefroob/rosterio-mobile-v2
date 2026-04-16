@@ -87,14 +87,9 @@ const ProfileScreen = () => {
           <View style={styles.headerSection}>
             <GlassSection style={styles.profileCard}>
               <View style={styles.avatarRow}>
-                <LinearGradient
-                  colors={["#007AFF", "#5E5CE6"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.avatarCircle}
-                >
+                <View style={styles.avatarCircle}>
                   <Text style={styles.avatarInitials}>{initials}</Text>
-                </LinearGradient>
+                </View>
               </View>
               <Text style={styles.profileName}>{user?.name || "User"}</Text>
               <Text style={styles.profileEmail}>{user?.email}</Text>
@@ -204,18 +199,15 @@ const styles = StyleSheet.create({
     width: 84,
     height: 84,
     borderRadius: 42,
+    backgroundColor: glassTheme.colors.wash.black,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#007AFF",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.28,
-    shadowRadius: 16,
-    elevation: 8,
+    ...glassTheme.shadows.large,
   },
   avatarInitials: {
     fontSize: 32,
     fontWeight: "700",
-    color: "white",
+    color: glassTheme.colors.primary,
     letterSpacing: -0.5,
   },
   profileName: {

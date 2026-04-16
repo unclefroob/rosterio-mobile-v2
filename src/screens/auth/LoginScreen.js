@@ -77,14 +77,9 @@ const LoginScreen = ({ navigation }) => {
       >
         {/* Logo section */}
         <View style={styles.logoSection}>
-          <LinearGradient
-            colors={["#007AFF", "#5E5CE6"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.logoCircle}
-          >
-            <Ionicons name="briefcase" size={38} color="white" />
-          </LinearGradient>
+          <View style={styles.logoSquare}>
+            <Ionicons name="briefcase" size={38} color={glassTheme.colors.primary} />
+          </View>
           <Text style={styles.appName}>Rosterio</Text>
           <Text style={styles.tagline}>Sign in to your account</Text>
         </View>
@@ -190,10 +185,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 36,
   },
-  logoCircle: {
+  logoSquare: {
     width: 88,
     height: 88,
     borderRadius: 28,
+    backgroundColor: glassTheme.colors.wash.black,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 18,

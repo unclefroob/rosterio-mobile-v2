@@ -68,18 +68,13 @@ const AccountSelectScreen = () => {
           ]}
         >
           <View style={styles.specular} pointerEvents="none" />
-          <LinearGradient
-            colors={isSelected ? ["#007AFF", "#5E5CE6"] : ["#E8F0FF", "#EDE8FF"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.accountIconCircle}
-          >
+          <View style={[styles.accountIconCircle, isSelected && styles.accountIconCircleSelected]}>
             <Ionicons
               name="business"
               size={26}
-              color={isSelected ? "white" : glassTheme.colors.primary}
+              color={isSelected ? glassTheme.colors.text.inverse : glassTheme.colors.primary}
             />
-          </LinearGradient>
+          </View>
           <View style={styles.accountInfo}>
             <Text style={[styles.accountName, isSelected && styles.accountNameSelected]}>
               {item.name}
@@ -106,14 +101,9 @@ const AccountSelectScreen = () => {
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         {/* Header */}
         <View style={styles.header}>
-          <LinearGradient
-            colors={["#007AFF", "#5E5CE6"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.headerIcon}
-          >
-            <Ionicons name="briefcase" size={28} color="white" />
-          </LinearGradient>
+          <View style={styles.headerIcon}>
+            <Ionicons name="briefcase" size={28} color={glassTheme.colors.primary} />
+          </View>
           <Text style={styles.title}>Select Account</Text>
           <Text style={styles.subtitle}>Choose which account to manage</Text>
         </View>
@@ -182,14 +172,11 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 22,
+    backgroundColor: glassTheme.colors.wash.black,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-    shadowColor: "#007AFF",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.28,
-    shadowRadius: 16,
-    elevation: 8,
+    ...glassTheme.shadows.medium,
   },
   title: {
     fontSize: 28,
@@ -241,9 +228,13 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 16,
+    backgroundColor: glassTheme.colors.wash.black,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 14,
+  },
+  accountIconCircleSelected: {
+    backgroundColor: glassTheme.colors.primary,
   },
   accountInfo: {
     flex: 1,

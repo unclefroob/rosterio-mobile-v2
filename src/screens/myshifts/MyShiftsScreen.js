@@ -585,14 +585,14 @@ const MyShiftsScreen = () => {
             <View style={styles.shiftCardBadges}>
               {isConfirmed && (
                 <View style={[styles.badge, styles.badgeSuccess]}>
-                  <Ionicons name="checkmark-circle" size={14} color="#22c55e" />
-                  <Text style={[styles.badgeText, { color: "#22c55e" }]}>Completed</Text>
+                  <Ionicons name="checkmark-circle" size={14} color={glassTheme.colors.success} />
+                  <Text style={[styles.badgeText, { color: glassTheme.colors.success }]}>Completed</Text>
                 </View>
               )}
               {needsReview && (
                 <View style={[styles.badge, styles.badgeWarning]}>
-                  <Ionicons name="alert-circle" size={14} color="#f59e0b" />
-                  <Text style={[styles.badgeText, { color: "#f59e0b" }]}>Needs Review</Text>
+                  <Ionicons name="alert-circle" size={14} color={glassTheme.colors.warning} />
+                  <Text style={[styles.badgeText, { color: glassTheme.colors.warning }]}>Needs Review</Text>
                 </View>
               )}
             </View>
@@ -631,10 +631,10 @@ const MyShiftsScreen = () => {
     const target = request.targetUserId;
 
     const getStatusColor = () => {
-      if (request.status === "approved") return "#22c55e";
-      if (request.status === "rejected") return "#ef4444";
+      if (request.status === "approved") return glassTheme.colors.success;
+      if (request.status === "rejected") return glassTheme.colors.danger;
       if (request.status === "proposed") return "#3b82f6";
-      return "#f59e0b";
+      return glassTheme.colors.warning;
     };
 
     const getStatusBg = () => {
@@ -753,8 +753,8 @@ const MyShiftsScreen = () => {
                   style={[styles.swapRequestActionButton, styles.swapRequestActionButtonDanger]}
                   onPress={() => handleRejectSwap(request._id)}
                 >
-                  <Ionicons name="close-circle" size={18} color="#ef4444" />
-                  <Text style={[styles.swapRequestActionButtonText, { color: "#ef4444" }]}>
+                  <Ionicons name="close-circle" size={18} color={glassTheme.colors.danger} />
+                  <Text style={[styles.swapRequestActionButtonText, { color: glassTheme.colors.danger }]}>
                     Reject
                   </Text>
                 </TouchableOpacity>
@@ -765,8 +765,8 @@ const MyShiftsScreen = () => {
                 style={[styles.swapRequestActionButton, styles.swapRequestActionButtonDanger]}
                 onPress={() => handleCancelSwap(request._id)}
               >
-                <Ionicons name="close-circle" size={18} color="#ef4444" />
-                <Text style={[styles.swapRequestActionButtonText, { color: "#ef4444" }]}>
+                <Ionicons name="close-circle" size={18} color={glassTheme.colors.danger} />
+                <Text style={[styles.swapRequestActionButtonText, { color: glassTheme.colors.danger }]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -797,7 +797,7 @@ const MyShiftsScreen = () => {
 
           {incomingSwapRequests.length === 0 && outgoingSwapRequests.length === 0 && (
             <View style={styles.emptyState}>
-              <Ionicons name="swap-horizontal" size={64} color="#d1d5db" />
+              <Ionicons name="swap-horizontal" size={64} color={glassTheme.colors.text.tertiary} />
               <Text style={styles.emptyStateText}>No swap requests</Text>
               <Text style={styles.emptyStateSubtext}>
                 Swap requests will appear here when you request or receive swaps
@@ -819,7 +819,7 @@ const MyShiftsScreen = () => {
     if (shifts.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Ionicons name="calendar-outline" size={48} color="#d1d5db" />
+          <Ionicons name="calendar-outline" size={48} color={glassTheme.colors.text.tertiary} />
           <Text style={styles.emptyStateText}>
             {activeTab === "upcoming"
               ? "No upcoming shifts"
@@ -1330,7 +1330,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   filterChipBadge: {
-    backgroundColor: "#d1d5db",
+    backgroundColor: glassTheme.colors.text.tertiary,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -1473,9 +1473,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: "#22c55e",
+    backgroundColor: glassTheme.colors.success,
     minHeight: 44, // Touch-friendly
-    shadowColor: "#22c55e",
+    shadowColor: glassTheme.colors.success,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -1574,7 +1574,7 @@ const styles = StyleSheet.create({
   swapRequestShiftBoxEmpty: {
     borderStyle: "dashed",
     backgroundColor: "transparent",
-    borderColor: "#d1d5db",
+    borderColor: glassTheme.colors.text.tertiary,
   },
   swapRequestShiftLabel: {
     fontSize: 11,
@@ -1652,7 +1652,7 @@ const styles = StyleSheet.create({
   swapRequestActionButtonDanger: {
     backgroundColor: "transparent",
     borderWidth: 1.5,
-    borderColor: "#ef4444",
+    borderColor: glassTheme.colors.danger,
   },
   swapRequestActionButtonText: {
     fontSize: 15,
@@ -1838,7 +1838,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fef3c7",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#f59e0b",
+    borderColor: glassTheme.colors.warning,
   },
   acceptWithoutProposingText: {
     fontSize: 14,
@@ -1877,16 +1877,16 @@ const styles = StyleSheet.create({
   modalButtonCancel: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: glassTheme.colors.text.tertiary,
   },
   modalButtonPrimary: {
     backgroundColor: glassTheme.colors.primary,
   },
   modalButtonDanger: {
-    backgroundColor: "#ef4444",
+    backgroundColor: glassTheme.colors.danger,
   },
   modalButtonAccept: {
-    backgroundColor: "#f59e0b",
+    backgroundColor: glassTheme.colors.warning,
   },
   modalButtonCancelText: {
     fontSize: 14,

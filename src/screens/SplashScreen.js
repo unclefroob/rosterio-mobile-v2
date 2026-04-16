@@ -31,14 +31,9 @@ const SplashScreen = () => {
       >
         <View style={styles.specular} pointerEvents="none" />
 
-        <LinearGradient
-          colors={["#007AFF", "#5E5CE6"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.logoCircle}
-        >
-          <Ionicons name="briefcase" size={36} color="white" />
-        </LinearGradient>
+        <View style={styles.logoCircle}>
+          <Ionicons name="briefcase" size={36} color={glassTheme.colors.primary} />
+        </View>
 
         <Text style={styles.title}>Rosterio</Text>
         <Text style={styles.subtitle}>Shift Marketplace</Text>
@@ -86,14 +81,11 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 26,
+    backgroundColor: glassTheme.colors.wash.black,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 22,
-    shadowColor: "#007AFF",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.30,
-    shadowRadius: 16,
-    elevation: 8,
+    ...glassTheme.shadows.large,
   },
   title: {
     fontSize: 30,
