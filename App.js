@@ -26,7 +26,7 @@ const AppTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "#F0F4FF", // matches screen background — eliminates the white safe-area flash
+    background: "#FFFFFF", // matches screen background — eliminates the white safe-area flash
   },
 };
 

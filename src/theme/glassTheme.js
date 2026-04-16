@@ -46,18 +46,18 @@ export const glassTheme = {
     },
 
     background: {
-      // Subtle periwinkle-white: gives glass surfaces a tinted background to blur through
-      primary: "#F0F4FF",
-      screen: "#F0F4FF",
+      // White/neutral — matches shiftos web (#ffffff / #f7f7f7)
+      primary: "#FFFFFF",
+      screen: "#FFFFFF",
       secondary: "rgba(255, 255, 255, 0.92)",
-      tertiary: "#E8ECFA",
+      tertiary: "#F7F7F7",
     },
 
     // Screen gradient stops (use with expo-linear-gradient)
     gradients: {
-      screen:  ["#EEF2FF", "#F0EEFF"],          // Periwinkle → lavender
-      vivid:   ["#EEF2FF", "#EDE8FF", "#ECE8FF"], // Periwinkle → lavender
-      auth:    ["#EEF2FF", "#EDE8FF", "#EBE8F0"], // Soft auth screen
+      screen:  ["#FFFFFF", "#F7F7F7"],          // White → light wash
+      vivid:   ["#FFFFFF", "#F7F7F7", "#FFFFFF"], // White → wash → white
+      auth:    ["#FFFFFF", "#F7F7F7", "#FFFFFF"], // White auth screen
     },
 
     // Tinted icon container washes
