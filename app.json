@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Rosterio",
+    "slug": "rosterio-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#F0F4FF"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "bundleIdentifier": "com.moonyscreek.rosterio-mobile",
+      "supportsTablet": false
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F0F4FF"
+      },
+      "package": "com.moonyscreek.rosteriomobile"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": true
+          },
+          "android": {
+            "newArchEnabled": true
+          }
+        }
+      ]
+    ]
+  }
+}

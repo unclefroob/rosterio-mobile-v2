@@ -1,0 +1,41 @@
+{
+  "name": "rosterio-mobile-v2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^14.1.0",
+    "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-navigation/bottom-tabs": "^6.6.1",
+    "@react-navigation/native": "^6.1.18",
+    "@react-navigation/stack": "^6.4.1",
+    "axios": "^1.7.9",
+    "date-fns": "^2.30.0",
+    "expo": "~53.0.0",
+    "expo-asset": "~11.1.5",
+    "expo-blur": "~14.1.5",
+    "expo-build-properties": "^55.0.13",
+    "expo-constants": "~17.1.8",
+    "expo-font": "~13.3.1",
+    "expo-glass-effect": "^55.0.10",
+    "expo-linear-gradient": "~14.1.5",
+    "react": "19.0.0",
+    "react-native": "0.79.6",
+    "react-native-gesture-handler": "~2.24.0",
+    "react-native-pager-view": "6.6.1",
+    "react-native-reanimated": "~3.17.4",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1",
+    "react-native-tab-view": "^4.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "babel-preset-expo": "~13.0.0"
+  },
+  "private": true
+}
