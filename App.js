@@ -86,8 +86,10 @@ const ProfileNavigator = () => (
 );
 
 const AppTabs = () => {
-  const { hasMarketplace, loading: planLoading } = usePlan();
-  if (planLoading) return null;
+  const { hasMarketplace } = usePlan();
+  // Don't block on planLoading — render tabs immediately after auth.
+  // hasMarketplace defaults to false until plan resolves, so Marketplace
+  // tab simply appears once loaded rather than blocking navigation.
 
   return (
     <Tab.Navigator
