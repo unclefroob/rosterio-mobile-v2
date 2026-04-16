@@ -1,14 +1,14 @@
 /**
  * LiquidTabBar — Apple iOS 26 floating glass pill tab bar
  *
- * Three-tier rendering:
- *   iOS 26+ native build:  GlassContainer > GlassView (expo-glass-effect)
- *                          ↳ Real UIVisualEffectView liquid glass material
- *   iOS <26 / Expo Go:     BlurView tint="systemChromeMaterial" intensity=100
- *                          ↳ UIBlurEffect.Style.systemChromeMaterial (system bar chrome)
- *   Android / fallback:    Frosted white surface
+ * Layout (bottom → top):
+ *   1. Full-width blur scrim — covers the safe area + pill zone, blurs screen
+ *      content so it doesn't visually bleed into the tab bar area.
+ *   2. Floating pill — centered with 16pt margins, frosted blur inside.
+ *   3. Active tab indicator — white pill behind the focused tab item.
  *
- * Shape: floating pill — centered, 16pt horizontal margin, 34pt border radius.
+ * The outer wrapper is position:absolute from the screen bottom, full width,
+ * so screens render full-height and there is no white chin below the tab bar.
  */
 
 import React, { useRef } from "react";
@@ -30,6 +30,11 @@ import {
 } from "../utils/glassEffect";
 import glassTheme from "../theme/glassTheme";
 
+// Height of the gradient that fades the blur in from the top of the scrim.
+// The gradient sits at the very top of the scrim zone, going from white
+// (completely hiding the hard blur edge) to transparent (full blur visible).
+const SCRIM_FADE_HEIGHT = 64;
+
 let BlurView;
 try {
   BlurView = require("expo-blur").BlurView;
@@ -39,6 +44,9 @@ try {
 
 // Height of the visible tab row (not counting safe area or float gap)
 export const TAB_BAR_CONTENT_HEIGHT = 56;
+
+// Total bottom inset screens should pad their scroll content by
+export const TAB_BAR_BOTTOM_INSET = TAB_BAR_CONTENT_HEIGHT + 16;
 
 const ICONS = {
   Dashboard:   { focused: "home",          unfocused: "home-outline",          lib: "Ionicons" },
@@ -85,7 +93,7 @@ const TabItem = ({ route, isFocused, onPress }) => {
       accessibilityState={{ selected: isFocused }}
       accessibilityLabel={label}
     >
-      <Animated.View style={[styles.tabInner, { transform: [{ scale: scaleAnim }] }]}>
+      <Animated.View style={[styles.tabInner, isFocused && styles.tabInnerFocused, { transform: [{ scale: scaleAnim }] }]}>
         <IconComp
           name={iconName}
           size={23}
@@ -99,12 +107,11 @@ const TabItem = ({ route, isFocused, onPress }) => {
   );
 };
 
-// ─── Tab row shared across all render paths ────────────────────
+// ─── Tab row ───────────────────────────────────────────────────
 const TabRow = ({ state, navigation }) => (
   <View style={styles.row}>
     {state.routes.map((route, index) => {
       const isFocused = state.index === index;
-
       const onPress = () => {
         const event = navigation.emit({
           type: "tabPress",
@@ -115,116 +122,154 @@ const TabRow = ({ state, navigation }) => (
           navigation.navigate(route.name);
         }
       };
-
       return (
-        <TabItem
-          key={route.key}
-          route={route}
-          isFocused={isFocused}
-          onPress={onPress}
-        />
+        <TabItem key={route.key} route={route} isFocused={isFocused} onPress={onPress} />
       );
     })}
   </View>
 );
 
-// ─── Main tab bar component ────────────────────────────────────
+// ─── Main component ────────────────────────────────────────────
 const LiquidTabBar = ({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
-  const bottomPad = insets.bottom + 8;
+  // Pill floats 12pt above the home indicator
+  const pillBottom = insets.bottom + 12;
+  // Scrim covers safe area + pill height + 6pt top gap
+  const scrimHeight = insets.bottom + TAB_BAR_CONTENT_HEIGHT + 18;
 
   const liquidGlass = Platform.OS === "ios" && isLiquidGlassAvailable();
-  const systemBlur  = !liquidGlass && Platform.OS === "ios" && BlurView != null;
+
+  // Reusable scrim + fade layer used in both render paths
+  const ScrimLayers = () => (
+    <>
+      {/* Full-width blur scrim behind pill + safe area zone */}
+      {BlurView && (
+        <BlurView
+          intensity={28}
+          tint="light"
+          style={[styles.scrim, { height: scrimHeight }]}
+          pointerEvents="none"
+        />
+      )}
+      {/*
+        Gradient fade at the top of the scrim — eliminates the hard blur cutoff.
+
+        How it works: the gradient sits at the very top of the scrim zone.
+        Its top is white (fully hiding the blur edge so it blends with the
+        screen background), and it fades to transparent going downward.
+        The blur then "reveals" itself gradually as the gradient fades out,
+        mimicking the CAGradientLayer mask used in native iOS apps.
+      */}
+      <LinearGradient
+        colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.55)"]}
+        style={[styles.scrimFade, { bottom: scrimHeight, height: SCRIM_FADE_HEIGHT }]}
+        pointerEvents="none"
+      />
+    </>
+  );
 
   if (liquidGlass) {
     return (
-      <View style={[styles.outerWrapper, { paddingBottom: bottomPad }]}>
-        <View style={styles.pillClip}>
-          <GlassContainer>
-            <GlassView
-              glassEffectStyle="regular"
-              isInteractive
-              style={styles.pillInner}
-            >
-              <View style={styles.specularHairline} pointerEvents="none" />
-              <TabRow state={state} navigation={navigation} />
-            </GlassView>
-          </GlassContainer>
+      <View style={styles.outerWrapper} pointerEvents="box-none">
+        <ScrimLayers />
+        <View style={[styles.pillWrapper, { bottom: pillBottom }]}>
+          <View style={styles.pill}>
+            <GlassContainer>
+              <GlassView glassEffectStyle="regular" isInteractive style={styles.pillInner}>
+                <View style={styles.specularHairline} pointerEvents="none" />
+                <TabRow state={state} navigation={navigation} />
+              </GlassView>
+            </GlassContainer>
+          </View>
         </View>
       </View>
     );
   }
 
-  if (systemBlur) {
-    return (
-      <View style={[styles.outerWrapper, { paddingBottom: bottomPad }]}>
-        <View style={styles.pillClip}>
-          <BlurView intensity={100} tint="systemChromeMaterial" style={styles.pillInner}>
-            <LinearGradient
-              colors={["rgba(255,255,255,0.60)", "rgba(255,255,255,0.0)"]}
-              style={styles.specularGradient}
-              pointerEvents="none"
-            />
-            <View style={styles.specularHairline} pointerEvents="none" />
-            <TabRow state={state} navigation={navigation} />
-          </BlurView>
-        </View>
-      </View>
-    );
-  }
-
-  // Android / fallback — solid frosted surface
+  // Expo Go / non-native: frosted pill + blur scrim with gradient fade
   return (
-    <View style={[styles.outerWrapper, { paddingBottom: bottomPad }]}>
-      <View style={[styles.pillClip, styles.pillFallback]}>
-        <TabRow state={state} navigation={navigation} />
+    <View style={styles.outerWrapper} pointerEvents="box-none">
+      <ScrimLayers />
+      <View style={[styles.pillWrapper, { bottom: pillBottom }]}>
+        <View style={styles.pill}>
+          {BlurView && (
+            <BlurView
+              intensity={50}
+              tint="light"
+              style={StyleSheet.absoluteFillObject}
+            />
+          )}
+          <View style={[StyleSheet.absoluteFillObject, styles.pillTint]} pointerEvents="none" />
+          <View style={styles.specularHairline} pointerEvents="none" />
+          <TabRow state={state} navigation={navigation} />
+        </View>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  // Outer wrapper: provides the floating horizontal margins + bottom float gap
+  // Full-screen absolute anchor — sits over screen content, box-none so
+  // touches pass through the transparent areas.
   outerWrapper: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
-  },
-
-  // Pill clip: rounds the corners and clips the blur/glass content
-  pillClip: {
-    borderRadius: 34,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.55)",
-    // Subtle shadow for the pill floating effect (Android: elevation)
-    elevation: 8,
-  },
-
-  pillFallback: {
-    backgroundColor: "rgba(248, 250, 255, 0.97)",
-  },
-
-  // Inner content of the pill — sized by the row
-  pillInner: {},
-
-  // 6px gradient specular — glass catching light at the top edge
-  specularGradient: {
     position: "absolute",
-    top: 0,
     left: 0,
     right: 0,
-    height: 6,
-    zIndex: 3,
+    bottom: 0,
+    top: 0,
   },
 
-  // Single-pixel white hairline — top edge specular reflection
+  // Full-width blur band anchored to screen bottom.
+  scrim: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  // White-to-transparent gradient that fades the top edge of the blur scrim.
+  // Positioned at the top of the scrim zone (calculated inline).
+  scrimFade: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+  },
+
+  // Pill is absolutely positioned with horizontal margins
+  pillWrapper: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+  },
+
+  // Floating glass pill
+  pill: {
+    borderRadius: 34,
+    overflow: "hidden",
+    backgroundColor: "transparent",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.8)",
+    shadowColor: "#6366F1",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+
+  // Semi-transparent tint over the pill blur
+  pillTint: {
+    backgroundColor: "rgba(255,255,255,0.30)",
+  },
+
+  pillInner: {},
+
   specularHairline: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "rgba(255,255,255,0.75)",
+    backgroundColor: "rgba(255,255,255,0.9)",
     zIndex: 4,
   },
 
@@ -233,7 +278,6 @@ const styles = StyleSheet.create({
     height: TAB_BAR_CONTENT_HEIGHT,
     alignItems: "center",
     paddingHorizontal: 4,
-    zIndex: 5,
   },
 
   tabItem: {
@@ -250,6 +294,14 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 14,
     gap: 3,
+  },
+
+  tabInnerFocused: {
+    backgroundColor: "rgba(255,255,255,0.78)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
   },
 
   label: {

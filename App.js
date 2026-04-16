@@ -1,5 +1,5 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -20,6 +20,14 @@ import ProfileScreen from "./src/screens/profile/ProfileScreen";
 import EditProfileScreen from "./src/screens/profile/EditProfileScreen";
 import MyClaimsScreen from "./src/screens/claims/MyClaimsScreen";
 import SplashScreen from "./src/screens/SplashScreen";
+
+const AppTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: "#F5E0FF", // matches vivid gradient end — eliminates the white safe-area flash
+  },
+};
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -133,7 +141,7 @@ function RootNavigator() {
   const isAuthenticated = state.isSignedIn && state.selectedAccount;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={AppTheme}>
       {isAuthenticated ? <AppTabs /> : <AuthNavigator />}
     </NavigationContainer>
   );

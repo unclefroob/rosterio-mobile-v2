@@ -17,6 +17,7 @@ function authReducer(state, action) {
     case "SIGN_IN":
       return {
         ...state,
+        isLoading: false,
         isSignedIn: true,
         userToken: action.payload.token,
         user: action.payload.user,

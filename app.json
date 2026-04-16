@@ -3,6 +3,7 @@
     "name": "Rosterio",
     "slug": "rosterio-mobile",
     "version": "1.0.0",
+    "scheme": "rosterio",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
@@ -21,6 +22,7 @@
       "package": "com.moonyscreek.rosteriomobile"
     },
     "plugins": [
+      "expo-router",
       "expo-asset",
       "expo-font",
       [
