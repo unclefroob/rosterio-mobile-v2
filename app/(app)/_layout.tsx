@@ -1,41 +1,53 @@
-/**
- * NativeTabs layout — the money shot.
- *
- * Uses expo-router/unstable-native-tabs to render the iOS 26 native
- * liquid glass tab bar. On iOS 26+ this produces the floating pill
- * with the glass effect built into UIKit.
- *
- * SF Symbol names used:
- *   Home        house / house.fill
- *   Marketplace storefront / storefront.fill
- *   Shifts      calendar / calendar.fill
- *   Profile     person.circle / person.circle.fill
- */
-
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import glassTheme from '../../src/theme/glassTheme';
 
 export default function AppLayout() {
   return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="marketplace">
-        <NativeTabs.Trigger.Label>Market</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'storefront', selected: 'storefront.fill' }} />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="shifts">
-        <NativeTabs.Trigger.Label>Shifts</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'calendar', selected: 'calendar.fill' }} />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'person.circle', selected: 'person.circle.fill' }} />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: glassTheme.colors.primary,
+        tabBarInactiveTintColor: glassTheme.colors.text.tertiary,
+        tabBarStyle: { backgroundColor: glassTheme.colors.background.primary },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons name={focused ? 'house' : 'house-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: 'Market',
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons name={focused ? 'storefront' : 'storefront-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="shifts"
+        options={{
+          title: 'Shifts',
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
