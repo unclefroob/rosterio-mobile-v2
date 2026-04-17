@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import {
   View,
   Text,
@@ -112,6 +112,10 @@ const ShiftDetailsScreen = () => {
   const isFullyAssigned =
     shift.assignedUsers?.length >= shift.requiredStaffCount;
   const isPastShift = endDate && isPast(endDate);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: format(startDate, "EEEE, MMMM d") });
+  }, [navigation, startDate]);
 
   const handleClaimShift = async () => {
     setClaiming(true);
@@ -243,26 +247,16 @@ const ShiftDetailsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+    <SafeAreaView style={{ flex: 1 }} edges={[]}>
       <ScrollView style={styles.container}>
-        {/* Header Info */}
+        {/* Subheader: time + assignment badge */}
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="chevron-back" size={24} color={glassTheme.colors.text.primary} />
-          </TouchableOpacity>
-          <View style={styles.dateTimeContainer}>
-            <Text style={styles.date}>{format(startDate, "EEEE, MMMM d")}</Text>
-            <Text style={styles.time}>
-              {format(startDate, "h:mm a")} - {format(endDate, "h:mm a")}
-            </Text>
-          </View>
+          <Text style={styles.time}>
+            {format(startDate, "h:mm a")} – {format(endDate, "h:mm a")}
+          </Text>
           {isFullyAssigned && (
             <View style={styles.filledBadge}>
-              <Ionicons name="checkmark-circle" size={20} color={glassTheme.colors.success} />
+              <Ionicons name="checkmark-circle" size={16} color={glassTheme.colors.success} />
               <Text style={styles.filledBadgeText}>Fully Assigned</Text>
             </View>
           )}
@@ -669,31 +663,19 @@ const styles = StyleSheet.create({
     backgroundColor: glassTheme.colors.background.screen,
   },
   header: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: glassTheme.colors.background.primary,
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: glassTheme.border.color,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  backButton: {
-    marginRight: 8,
-    marginTop: 2,
-  },
-  dateTimeContainer: {
-    flex: 1,
-  },
-  date: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: glassTheme.colors.text.primary,
+    alignItems: "center",
   },
   time: {
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: "500",
     color: glassTheme.colors.text.secondary,
-    marginTop: 4,
   },
   filledBadge: {
     backgroundColor: `${glassTheme.colors.success}22`,
