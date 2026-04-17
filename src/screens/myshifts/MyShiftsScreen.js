@@ -723,7 +723,7 @@ const MyShiftsScreen = () => {
       <TouchableOpacity
         key={shift._id}
         style={styles.shiftCard}
-        onPress={() => navigation.navigate("shift-details", { shift, fromMyShifts: true })}
+        onPress={() => navigation.navigate("ShiftDetails", { shift, fromMyShifts: true })}
         activeOpacity={0.7}
       >
         <CardContainer style={styles.shiftCardInner} {...cardProps}>

@@ -57,7 +57,7 @@ const MarketplaceNavigator = () => (
     <Stack.Screen
       name="ShiftDetails"
       component={ShiftDetailsScreen}
-      options={{ headerShown: true, title: "Shift Details", ...glassHeaderOptions }}
+      options={{ headerShown: false }}
     />
     <Stack.Screen
       name="MyClaims"
@@ -73,7 +73,7 @@ const MyShiftsNavigator = () => (
     <Stack.Screen
       name="ShiftDetails"
       component={ShiftDetailsScreen}
-      options={{ headerShown: true, title: "Shift Details", ...glassHeaderOptions }}
+      options={{ headerShown: false }}
     />
   </Stack.Navigator>
 );

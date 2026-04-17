@@ -127,7 +127,7 @@ const ProfileScreen = () => {
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.editButton}
-              onPress={() => navigation.navigate("edit-profile")}
+              onPress={() => navigation.navigate("EditProfile")}
               activeOpacity={0.75}
             >
               <Ionicons name="create-outline" size={18} color={glassTheme.colors.primary} />

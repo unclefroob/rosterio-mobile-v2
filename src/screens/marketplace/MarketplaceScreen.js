@@ -85,7 +85,7 @@ const MarketplaceScreen = () => {
 
   const handleShiftPress = (shift) => {
     const personalized = personalizedData.get(shift._id.toString());
-    navigation.navigate("shift-details", {
+    navigation.navigate("ShiftDetails", {
       shift,
       personalized,
     });
@@ -412,7 +412,7 @@ const MarketplaceScreen = () => {
         <Text style={styles.headerTitle}>Marketplace</Text>
         <TouchableOpacity
           style={styles.myClaimsButton}
-          onPress={() => navigation.navigate("my-claims")}
+          onPress={() => navigation.navigate("MyClaims")}
           activeOpacity={0.7}
         >
           <Ionicons name="receipt-outline" size={16} color={glassTheme.colors.primary} />

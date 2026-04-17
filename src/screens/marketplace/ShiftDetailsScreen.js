@@ -247,6 +247,13 @@ const ShiftDetailsScreen = () => {
       <ScrollView style={styles.container}>
         {/* Header Info */}
         <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="chevron-back" size={24} color={glassTheme.colors.text.primary} />
+          </TouchableOpacity>
           <View style={styles.dateTimeContainer}>
             <Text style={styles.date}>{format(startDate, "EEEE, MMMM d")}</Text>
             <Text style={styles.time}>
@@ -670,6 +677,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+  },
+  backButton: {
+    marginRight: 8,
+    marginTop: 2,
   },
   dateTimeContainer: {
     flex: 1,
