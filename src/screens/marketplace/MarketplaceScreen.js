@@ -141,24 +141,24 @@ const MarketplaceScreen = () => {
   );
 
   const renderShiftCard = ({ item }) => {
-    const startDate = new Date(item.startTime);
-    const endDate = new Date(item.endTime);
-    const duration = (endDate - startDate) / (1000 * 60 * 60); // hours
+    const startDate = item.startTime ? new Date(item.startTime) : null;
+    const endDate = item.endTime ? new Date(item.endTime) : null;
+    const duration = startDate && endDate ? (endDate - startDate) / (1000 * 60 * 60) : null;
     const isFullyAssigned =
       item.assignedUsers?.length >= item.requiredStaffCount;
     const personalized = personalizedData.get(item._id.toString());
     const claimStatus = personalized?.claimStatus;
-    
+
     // Calculate time until shift starts
-    const hoursUntilStart = differenceInHours(startDate, new Date());
+    const hoursUntilStart = startDate ? differenceInHours(startDate, new Date()) : -1;
     const isStartingSoon = hoursUntilStart > 0 && hoursUntilStart <= 24;
     const isUrgent = hoursUntilStart > 0 && hoursUntilStart <= 6;
-    
+
     // Format date with relative indicator
-    let dateDisplay = format(startDate, "MMM d, yyyy");
-    if (isToday(startDate)) {
+    let dateDisplay = startDate ? format(startDate, "MMM d, yyyy") : "TBD";
+    if (startDate && isToday(startDate)) {
       dateDisplay = "Today";
-    } else if (isTomorrow(startDate)) {
+    } else if (startDate && isTomorrow(startDate)) {
       dateDisplay = "Tomorrow";
     }
 
@@ -203,7 +203,9 @@ const MarketplaceScreen = () => {
               )}
             </View>
             <Text style={styles.shiftTime}>
-              {format(startDate, "h:mm a")} - {format(endDate, "h:mm a")}
+              {startDate && endDate
+                ? `${format(startDate, "h:mm a")} - ${format(endDate, "h:mm a")}`
+                : "TBD"}
             </Text>
           </View>
           <View style={styles.headerRight}>
@@ -234,11 +236,13 @@ const MarketplaceScreen = () => {
                 {item.assignedUsers?.length || 0}/{item.requiredStaffCount} staff
               </Text>
               <View style={styles.staffingBar}>
-                <View 
+                <View
                   style={[
-                    styles.staffingBarFill, 
-                    { width: `${((item.assignedUsers?.length || 0) / item.requiredStaffCount) * 100}%` }
-                  ]} 
+                    styles.staffingBarFill,
+                    { width: item.requiredStaffCount > 0
+                        ? `${((item.assignedUsers?.length || 0) / item.requiredStaffCount) * 100}%`
+                        : "0%" }
+                  ]}
                 />
               </View>
             </View>
@@ -247,7 +251,7 @@ const MarketplaceScreen = () => {
             <View style={styles.detailIconContainer}>
               <Ionicons name="time-outline" size={18} color={glassTheme.colors.primary} />
             </View>
-            <Text style={styles.detailText}>{duration.toFixed(1)} hours</Text>
+            <Text style={styles.detailText}>{duration !== null ? `${duration.toFixed(1)} hours` : "—"}</Text>
           </View>
           {item.costEstimate?.totalCost && (
             <View style={styles.detailRow}>
