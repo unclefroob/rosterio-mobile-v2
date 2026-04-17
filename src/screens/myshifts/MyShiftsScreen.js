@@ -129,14 +129,12 @@ const MyShiftsScreen = () => {
   const [completionData, setCompletionData] = useState({
     hasIssues: false,
     issueDescription: "",
-    actualAttendees: [],
-    noShows: [],
+    actualAttendees: [],    // array of user ID strings
+    noShows: [],            // array of user ID strings
+    notes: "",              // shift-level notes
+    performanceRatings: {}, // { [userId]: { score: number, comment: string } }
   });
   const [submittingCompletion, setSubmittingCompletion] = useState(false);
-  const [completionStaffSearchQuery, setCompletionStaffSearchQuery] = useState("");
-  const [completionStaffSearchResults, setCompletionStaffSearchResults] = useState([]);
-  const [searchingCompletionStaff, setSearchingCompletionStaff] = useState(false);
-  const [showCompletionStaffDropdown, setShowCompletionStaffDropdown] = useState(false);
 
   // Check-in state
   const [clockStatuses, setClockStatuses] = useState({});
@@ -509,20 +507,72 @@ const MyShiftsScreen = () => {
     );
   };
 
+  // Handle attendance toggles
+  const handleSetAttended = (userId) => {
+    setCompletionData((prev) => ({
+      ...prev,
+      actualAttendees: [...prev.actualAttendees.filter((id) => id !== userId), userId],
+      noShows: prev.noShows.filter((id) => id !== userId),
+    }));
+  };
+
+  const handleSetNoShow = (userId) => {
+    setCompletionData((prev) => ({
+      ...prev,
+      noShows: [...prev.noShows.filter((id) => id !== userId), userId],
+      actualAttendees: prev.actualAttendees.filter((id) => id !== userId),
+    }));
+  };
+
+  // Handle star rating / comment changes
+  const handleRatingChange = (userId, field, value) => {
+    setCompletionData((prev) => ({
+      ...prev,
+      performanceRatings: {
+        ...prev.performanceRatings,
+        [userId]: {
+          score: 0,
+          comment: "",
+          ...(prev.performanceRatings[userId] || {}),
+          [field]: value,
+        },
+      },
+    }));
+  };
+
   // Handle complete shift
   const handleCompleteShift = async () => {
     if (!selectedShiftForCompletion) return;
 
     try {
       setSubmittingCompletion(true);
-      const result = completionData.hasIssues
-        ? await rejectShiftCompletion(selectedShiftForCompletion._id, {
-            confirmationNotes: completionData.issueDescription,
-          })
-        : await completeShift(selectedShiftForCompletion._id, {
-            actualAttendees: completionData.actualAttendees,
-            noShows: completionData.noShows,
-          });
+      let result;
+      if (completionData.hasIssues) {
+        if (!completionData.issueDescription.trim()) {
+          Alert.alert("Error", "Please describe the issues before flagging");
+          return;
+        }
+        result = await rejectShiftCompletion(selectedShiftForCompletion._id, {
+          notes: completionData.issueDescription,
+          noShows: completionData.noShows,
+        });
+      } else {
+        // Exclude no-shows from ratings (they may have stale data if user toggled)
+        const noShowSet = new Set(completionData.noShows);
+        const ratingsArray = Object.entries(completionData.performanceRatings)
+          .filter(([userId, r]) => !noShowSet.has(userId) && (r.score > 0 || r.comment?.trim()))
+          .map(([userId, r]) => ({
+            userId,
+            ...(r.score > 0 && { score: r.score }),
+            ...(r.comment?.trim() && { comment: r.comment.trim() }),
+          }));
+        result = await completeShift(selectedShiftForCompletion._id, {
+          actualAttendees: completionData.actualAttendees,
+          noShows: completionData.noShows,
+          notes: completionData.notes.trim() || undefined,
+          performanceRatings: ratingsArray.length > 0 ? ratingsArray : undefined,
+        });
+      }
 
       if (result.success) {
         setShowCompleteModal(false);
@@ -532,9 +582,11 @@ const MyShiftsScreen = () => {
           issueDescription: "",
           actualAttendees: [],
           noShows: [],
+          notes: "",
+          performanceRatings: {},
         });
         await loadData(activeTab, true);
-        toast.success("Shift completion recorded");
+        toast.success(completionData.hasIssues ? "Issues flagged" : "Shift completion recorded");
       } else {
         Alert.alert("Error", result.message || "Failed to complete shift");
       }
@@ -722,11 +774,14 @@ const MyShiftsScreen = () => {
                 style={styles.completeButton}
                 onPress={() => {
                   setSelectedShiftForCompletion(shift);
+                  const assignedUserIds = (shift.assignedUsers || []).map((u) => u._id || u);
                   setCompletionData({
                     hasIssues: false,
                     issueDescription: "",
-                    actualAttendees: shift.assignedUsers || [],
+                    actualAttendees: assignedUserIds,
                     noShows: [],
+                    notes: "",
+                    performanceRatings: {},
                   });
                   setShowCompleteModal(true);
                 }}
@@ -1329,10 +1384,10 @@ const MyShiftsScreen = () => {
         onRequestClose={() => setShowCompleteModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentScroll}>
+          <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentScroll} keyboardShouldPersistTaps="handled">
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Complete Shift</Text>
-              <TouchableOpacity onPress={() => setShowCompleteModal(false)}>
+              <TouchableOpacity onPress={() => setShowCompleteModal(false)} accessibilityRole="button" accessibilityLabel="Close">
                 <Ionicons name="close" size={24} color={glassTheme.colors.text.primary} />
               </TouchableOpacity>
             </View>
@@ -1345,33 +1400,132 @@ const MyShiftsScreen = () => {
                 </Text>
                 <Text style={styles.modalShiftInfoTime}>
                   {selectedShiftForCompletion.startTime
-                    ? format(
-                        new Date(selectedShiftForCompletion.startTime),
-                        "MMM d, yyyy 'at' h:mm a"
-                      )
+                    ? format(new Date(selectedShiftForCompletion.startTime), "MMM d, yyyy 'at' h:mm a")
                     : "TBD"}
                 </Text>
               </View>
             )}
 
+            {/* Staff Attendance & Performance */}
             <View style={styles.modalInputGroup}>
-              <Text style={styles.modalLabel}>Flag Issues</Text>
+              <Text style={styles.modalLabel}>Staff Attendance & Performance</Text>
+              {selectedShiftForCompletion && (selectedShiftForCompletion.assignedUsers || []).length === 0 && (
+                <Text style={styles.modalHelperText}>No staff assigned to this shift.</Text>
+              )}
+              {(selectedShiftForCompletion?.assignedUsers || []).map((user) => {
+                const userId = user._id || user;
+                const userName = user.name || user.email || "Unknown";
+                const isAttendee = completionData.actualAttendees.includes(userId);
+                const isNoShow = completionData.noShows.includes(userId);
+                const rating = completionData.performanceRatings[userId] || { score: 0, comment: "" };
+
+                return (
+                  <View key={userId} style={styles.attendanceCard}>
+                    <Text style={styles.attendanceName}>{userName}</Text>
+                    <View style={styles.attendanceButtons}>
+                      <TouchableOpacity
+                        style={[styles.attendanceButton, isAttendee && styles.attendanceButtonAttended]}
+                        onPress={() => handleSetAttended(userId)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Mark ${userName} as attended`}
+                      >
+                        <Ionicons name="checkmark" size={16} color={isAttendee ? "#fff" : glassTheme.colors.success} />
+                        <Text style={[styles.attendanceButtonText, isAttendee && styles.attendanceButtonTextActive]}>
+                          Attended
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.attendanceButton, isNoShow && styles.attendanceButtonNoShow]}
+                        onPress={() => handleSetNoShow(userId)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Mark ${userName} as no show`}
+                      >
+                        <Ionicons name="close" size={16} color={isNoShow ? "#fff" : glassTheme.colors.danger} />
+                        <Text style={[styles.attendanceButtonText, isNoShow && styles.attendanceButtonTextActive]}>
+                          No Show
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {isAttendee && !completionData.hasIssues && (
+                      <View style={styles.performanceRow}>
+                        <View style={styles.starsRow}>
+                          {[1, 2, 3, 4, 5].map((star) => {
+                            const filled = star <= (rating.score || 0);
+                            return (
+                              <TouchableOpacity
+                                key={star}
+                                style={styles.starButton}
+                                onPress={() =>
+                                  handleRatingChange(userId, "score", rating.score === star ? 0 : star)
+                                }
+                                accessibilityRole="button"
+                                accessibilityLabel={`Rate ${userName} ${star} star${star !== 1 ? "s" : ""}`}
+                              >
+                                <Ionicons
+                                  name={filled ? "star" : "star-outline"}
+                                  size={22}
+                                  color={filled ? "#F59E0B" : glassTheme.colors.text.tertiary}
+                                />
+                              </TouchableOpacity>
+                            );
+                          })}
+                          <Text style={styles.ratingLabel}>
+                            {rating.score > 0 ? `${rating.score}/5` : "No rating"}
+                          </Text>
+                        </View>
+                        <TextInput
+                          style={styles.commentInput}
+                          placeholder={`Comment for ${userName} (optional)...`}
+                          value={rating.comment}
+                          onChangeText={(text) => handleRatingChange(userId, "comment", text)}
+                          multiline
+                          numberOfLines={2}
+                        />
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+
+            {/* Shift Notes */}
+            {!completionData.hasIssues && (
+              <View style={styles.modalInputGroup}>
+                <Text style={styles.modalLabel}>Notes (optional)</Text>
+                <TextInput
+                  style={[styles.searchInput, styles.textArea]}
+                  placeholder="Add any notes about this shift..."
+                  value={completionData.notes}
+                  onChangeText={(text) => setCompletionData((prev) => ({ ...prev, notes: text }))}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+            )}
+
+            {/* Flag Issues */}
+            <View style={styles.modalInputGroup}>
               <TouchableOpacity
                 style={styles.checkboxContainer}
                 onPress={() =>
                   setCompletionData((prev) => ({ ...prev, hasIssues: !prev.hasIssues }))
                 }
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: completionData.hasIssues }}
               >
                 <Ionicons
                   name={completionData.hasIssues ? "checkbox" : "square-outline"}
                   size={24}
-                  color={glassTheme.colors.primary}
+                  color={completionData.hasIssues ? glassTheme.colors.danger : glassTheme.colors.primary}
                 />
-                <Text style={styles.checkboxLabel}>This shift had issues</Text>
+                <Text style={[styles.checkboxLabel, completionData.hasIssues && { color: glassTheme.colors.danger }]}>
+                  Flag issues with this shift
+                </Text>
               </TouchableOpacity>
               {completionData.hasIssues && (
                 <TextInput
-                  style={[styles.searchInput, styles.textArea]}
+                  style={[styles.searchInput, styles.textArea, styles.issueInput]}
                   placeholder="Describe the issues..."
                   value={completionData.issueDescription}
                   onChangeText={(text) =>
@@ -1404,7 +1558,7 @@ const MyShiftsScreen = () => {
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
                   <Text style={styles.modalButtonPrimaryText}>
-                    {completionData.hasIssues ? "Flag Issues" : "Complete"}
+                    {completionData.hasIssues ? "Flag Issues" : "Complete Shift"}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -1999,6 +2153,89 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: glassTheme.colors.text.primary,
+  },
+  attendanceCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: glassTheme.border.color,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: glassTheme.colors.background.tertiary,
+  },
+  attendanceName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: glassTheme.colors.text.primary,
+    marginBottom: 10,
+  },
+  attendanceButtons: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  attendanceButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    gap: 6,
+    borderColor: glassTheme.border.color,
+    backgroundColor: "transparent",
+    minHeight: 44,
+  },
+  attendanceButtonAttended: {
+    backgroundColor: glassTheme.colors.success,
+    borderColor: glassTheme.colors.success,
+  },
+  attendanceButtonNoShow: {
+    backgroundColor: glassTheme.colors.danger,
+    borderColor: glassTheme.colors.danger,
+  },
+  attendanceButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: glassTheme.colors.text.secondary,
+  },
+  attendanceButtonTextActive: {
+    color: "#fff",
+  },
+  performanceRow: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: glassTheme.border.color,
+    gap: 8,
+  },
+  starsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  starButton: {
+    padding: 2,
+  },
+  ratingLabel: {
+    marginLeft: 6,
+    fontSize: 12,
+    color: glassTheme.colors.text.secondary,
+  },
+  commentInput: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 13,
+    color: glassTheme.colors.text.primary,
+    borderWidth: 1,
+    borderColor: glassTheme.border.color,
+    minHeight: 60,
+    textAlignVertical: "top",
+  },
+  issueInput: {
+    borderColor: `${glassTheme.colors.danger}55`,
+    backgroundColor: `${glassTheme.colors.danger}08`,
   },
   modalActions: {
     marginTop: 20,
