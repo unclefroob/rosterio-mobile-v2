@@ -71,7 +71,7 @@ const ForgotPasswordScreen = () => {
           </Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => navigation.navigate("login")}
             activeOpacity={0.8}
           >
             <Text style={styles.buttonText}>Back to Sign In</Text>
@@ -139,7 +139,7 @@ const ForgotPasswordScreen = () => {
 
           <TouchableOpacity
             style={styles.backLink}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => navigation.navigate("login")}
           >
             <Text style={styles.backLinkText}>Back to sign in</Text>
           </TouchableOpacity>

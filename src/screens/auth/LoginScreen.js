@@ -160,7 +160,7 @@ const LoginScreen = () => {
         {/* Forgot password */}
         <TouchableOpacity
           style={styles.forgotRow}
-          onPress={() => navigation.navigate("ForgotPassword")}
+          onPress={() => navigation.navigate("forgot-password")}
         >
           <Text style={styles.forgotText}>Forgot your password?</Text>
         </TouchableOpacity>
