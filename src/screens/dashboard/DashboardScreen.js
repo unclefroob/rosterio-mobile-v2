@@ -194,7 +194,7 @@ const DashboardScreen = () => {
                     value={data.stats.shiftsNeedingReviewCount}
                     color={glassTheme.colors.danger}
                     highlight
-                    onPress={() => navigation.navigate("MyShifts", { initialTab: "needsReview" })}
+                    onPress={() => navigation.navigate("shifts", { initialTab: "needsReview" })}
                   />
                 )}
                 <StatCard
@@ -202,7 +202,7 @@ const DashboardScreen = () => {
                   label="Unfilled Shifts"
                   value={data.stats?.unfilledShiftsCount || 0}
                   color={glassTheme.colors.warning}
-                  onPress={() => navigation.navigate("MyShifts", { initialTab: "upcoming" })}
+                  onPress={() => navigation.navigate("shifts", { initialTab: "upcoming" })}
                 />
                 <StatCard
                   icon="people-outline"
@@ -217,7 +217,7 @@ const DashboardScreen = () => {
                     value={data.stats.pendingSwapRequestsCount}
                     color={glassTheme.colors.info}
                     highlight
-                    onPress={() => navigation.navigate("MyShifts", { initialTab: "swapRequests" })}
+                    onPress={() => navigation.navigate("shifts", { initialTab: "swapRequests" })}
                   />
                 )}
               </>
@@ -230,7 +230,7 @@ const DashboardScreen = () => {
                   label="Upcoming Shifts"
                   value={data.stats?.upcomingShiftsCount || 0}
                   color={glassTheme.colors.primary}
-                  onPress={() => navigation.navigate("MyShifts", { initialTab: "upcoming" })}
+                  onPress={() => navigation.navigate("shifts", { initialTab: "upcoming" })}
                 />
                 {data.stats?.pendingClaimsCount > 0 && (
                   <StatCard
@@ -239,7 +239,7 @@ const DashboardScreen = () => {
                     value={data.stats.pendingClaimsCount}
                     color={glassTheme.colors.warning}
                     highlight
-                    onPress={() => navigation.navigate("MyShifts", { initialTab: "pendingClaims" })}
+                    onPress={() => navigation.navigate("shifts", { initialTab: "pendingClaims" })}
                   />
                 )}
                 <StatCard
@@ -255,7 +255,7 @@ const DashboardScreen = () => {
                     value={data.stats.incomingSwapRequestsCount}
                     color={glassTheme.colors.info}
                     highlight
-                    onPress={() => navigation.navigate("MyShifts", { initialTab: "swapRequests" })}
+                    onPress={() => navigation.navigate("shifts", { initialTab: "swapRequests" })}
                   />
                 )}
               </>
@@ -269,7 +269,7 @@ const DashboardScreen = () => {
                 <Text style={styles.sectionTitle}>Shifts I Manage</Text>
                 <TouchableOpacity
                   style={styles.seeAllButton}
-                  onPress={() => navigation.navigate("MyShifts", { initialTab: "upcoming" })}
+                  onPress={() => navigation.navigate("shifts", { initialTab: "upcoming" })}
                 >
                   <Text style={styles.seeAllText}>See All</Text>
                   <Ionicons name="chevron-forward" size={14} color={glassTheme.colors.text.secondary} />
@@ -279,7 +279,7 @@ const DashboardScreen = () => {
                 <ShiftCard
                   key={shift._id}
                   shift={shift}
-                  onPress={() => navigation.navigate("MyShifts", { initialTab: "upcoming", date: shift.startTime })}
+                  onPress={() => navigation.navigate("shifts", { initialTab: "upcoming", date: shift.startTime })}
                 />
               ))}
             </View>
@@ -292,7 +292,7 @@ const DashboardScreen = () => {
                 <Text style={styles.sectionTitle}>My Upcoming Shifts</Text>
                 <TouchableOpacity
                   style={styles.seeAllButton}
-                  onPress={() => navigation.navigate("MyShifts", { initialTab: "upcoming" })}
+                  onPress={() => navigation.navigate("shifts", { initialTab: "upcoming" })}
                 >
                   <Text style={styles.seeAllText}>See All</Text>
                   <Ionicons name="chevron-forward" size={14} color={glassTheme.colors.text.secondary} />
@@ -315,7 +315,7 @@ const DashboardScreen = () => {
                   <TouchableOpacity
                     key={shift._id}
                     style={styles.upcomingCard}
-                    onPress={() => navigation.navigate("MyShifts", { initialTab: "upcoming" })}
+                    onPress={() => navigation.navigate("shifts", { initialTab: "upcoming" })}
                     activeOpacity={0.72}
                   >
                     <CardContainer style={styles.upcomingCardInner} {...cardProps}>
@@ -345,7 +345,7 @@ const DashboardScreen = () => {
                 <Text style={styles.sectionTitle}>Swap Requests</Text>
                 <TouchableOpacity
                   style={styles.seeAllButton}
-                  onPress={() => navigation.navigate("MyShifts", { initialTab: "swapRequests" })}
+                  onPress={() => navigation.navigate("shifts", { initialTab: "swapRequests" })}
                 >
                   <Text style={styles.seeAllText}>See All</Text>
                   <Ionicons name="chevron-forward" size={14} color={glassTheme.colors.text.secondary} />
@@ -357,7 +357,7 @@ const DashboardScreen = () => {
                 return (
                   <TouchableOpacity
                     key={request._id}
-                    onPress={() => navigation.navigate("MyShifts", { initialTab: "swapRequests" })}
+                    onPress={() => navigation.navigate("shifts", { initialTab: "swapRequests" })}
                     style={styles.swapCard}
                   >
                     <CardContainer style={styles.swapCardInner} {...cardProps}>
@@ -393,7 +393,7 @@ const DashboardScreen = () => {
                 <Text style={styles.sectionTitle}>Pending Swap Approvals</Text>
                 <TouchableOpacity
                   style={styles.seeAllButton}
-                  onPress={() => navigation.navigate("MyShifts", { initialTab: "swapRequests" })}
+                  onPress={() => navigation.navigate("shifts", { initialTab: "swapRequests" })}
                 >
                   <Text style={styles.seeAllText}>See All</Text>
                   <Ionicons name="chevron-forward" size={14} color={glassTheme.colors.text.secondary} />
@@ -407,7 +407,7 @@ const DashboardScreen = () => {
                 return (
                   <TouchableOpacity
                     key={request._id}
-                    onPress={() => navigation.navigate("MyShifts", { initialTab: "swapRequests" })}
+                    onPress={() => navigation.navigate("shifts", { initialTab: "swapRequests" })}
                     style={styles.swapCard}
                   >
                     <CardContainer style={styles.swapCardInner} {...cardProps}>

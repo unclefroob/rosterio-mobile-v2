@@ -221,7 +221,7 @@ const MyClaimsScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.container} edges={[]}>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={glassTheme.colors.primary} />
         </View>
@@ -230,7 +230,7 @@ const MyClaimsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={[]}>
       <FlatList
         data={claims}
         renderItem={renderClaimCard}
