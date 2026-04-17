@@ -14,7 +14,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "bundleIdentifier": "com.moonyscreek.rosterio-mobile",
+      "bundleIdentifier": "com.ardorio.rosterio",
       "supportsTablet": false,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Rosterio uses your location to verify check-in and check-out at shift locations."
@@ -25,7 +25,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.moonyscreek.rosteriomobile",
+      "package": "com.ardorio.rosterio",
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
     "extra": {
