@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { toast } from "../../components/Toast";
 import { updateProfile, changePassword } from "../../services/apiHelper";
 import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import glassTheme from "../../theme/glassTheme";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, CommonActions } from "@react-navigation/native";
 
 let BlurView;
 try {
@@ -33,6 +33,31 @@ const EditProfileScreen = () => {
   const [activeSection, setActiveSection] = useState(
     route.params?.section || "profile"
   );
+
+  // Always inject a visible back button — works even when expo-router restores
+  // stale navigation state and the automatic back indicator is missing.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => {
+            const stackState = navigation.getState();
+            if (stackState && stackState.index > 0) {
+              navigation.goBack();
+            } else {
+              navigation.dispatch(
+                CommonActions.reset({ index: 0, routes: [{ name: "index" }] })
+              );
+            }
+          }}
+          style={{ paddingHorizontal: 8, paddingVertical: 4 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="chevron-back" size={26} color={glassTheme.colors.primary} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   // Profile form state
   const [profileData, setProfileData] = useState({

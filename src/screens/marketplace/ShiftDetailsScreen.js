@@ -25,7 +25,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 const ShiftDetailsScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { shift: initialShift, fromMyShifts } = route.params;
+  const { shift: initialShift, fromMyShifts } = route.params ?? {};
   const { state } = useAuth();
   const [shift, setShift] = useState(initialShift);
   const [personalized, setPersonalized] = useState(null);
@@ -44,6 +44,13 @@ const ShiftDetailsScreen = () => {
   const [searchingUsers, setSearchingUsers] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
 
+  // Redirect back if opened without shift data (e.g. restored navigation state with no params)
+  useEffect(() => {
+    if (!initialShift) {
+      navigation.canGoBack() ? navigation.goBack() : navigation.replace("index");
+    }
+  }, [initialShift, navigation]);
+
   // Check if we have claim status from navigation params
   useEffect(() => {
     if (route.params?.personalized) {
@@ -54,6 +61,7 @@ const ShiftDetailsScreen = () => {
   // Fetch shift details with populated constraints if needed
   useEffect(() => {
     const fetchShiftDetails = async () => {
+      if (!initialShift) return;
       // Check if constraints are not populated (constraintId is just a string ObjectId)
       const hasUnpopulatedConstraints = initialShift.constraints?.some(
         (c) =>
@@ -104,17 +112,19 @@ const ShiftDetailsScreen = () => {
     };
 
     fetchShiftDetails();
-  }, [initialShift._id]);
+  }, [initialShift?._id]);
 
-  const startDate = new Date(shift.startTime);
-  const endDate = new Date(shift.endTime);
-  const duration = (endDate - startDate) / (1000 * 60 * 60);
+  const startDate = shift ? new Date(shift.startTime) : null;
+  const endDate = shift ? new Date(shift.endTime) : null;
+  const duration = startDate && endDate ? (endDate - startDate) / (1000 * 60 * 60) : 0;
   const isFullyAssigned =
-    shift.assignedUsers?.length >= shift.requiredStaffCount;
+    shift?.assignedUsers?.length >= shift?.requiredStaffCount;
   const isPastShift = endDate && isPast(endDate);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: format(startDate, "EEEE, MMMM d") });
+    if (startDate) {
+      navigation.setOptions({ title: format(startDate, "EEEE, MMMM d") });
+    }
   }, [navigation, startDate]);
 
   const handleClaimShift = async () => {
@@ -238,12 +248,8 @@ const ShiftDetailsScreen = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={glassTheme.colors.primary} />
-      </View>
-    );
+  if (loading || !shift) {
+    return null;
   }
 
   return (

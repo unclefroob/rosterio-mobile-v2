@@ -11,7 +11,7 @@
  * from "index.js" to "expo-router/entry".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Stack, router, useSegments } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -23,6 +23,9 @@ import SplashScreen from '../src/screens/SplashScreen';
 function AuthGate() {
   const { state } = useAuth();
   const segments = useSegments();
+  // Tracks whether we've done the startup navigation reset this session.
+  // A module-level variable would also work, but useRef is idiomatic React.
+  const didResetOnLaunch = useRef(false);
 
   useEffect(() => {
     if (state.isLoading) return;
@@ -30,7 +33,13 @@ function AuthGate() {
     const inAuthGroup = segments[0] === '(auth)';
     const isAuthenticated = state.isSignedIn && state.selectedAccount;
 
-    if (isAuthenticated && inAuthGroup) {
+    if (isAuthenticated && (inAuthGroup || !didResetOnLaunch.current)) {
+      // Navigate to app root whenever:
+      //   a) we're on an auth screen but already authenticated (post-login redirect)
+      //   b) first time resolving authenticated state this session — this replace
+      //      creates a *fresh* (app) navigation tree, discarding any persisted
+      //      sub-stack state (e.g. profile/edit-profile restored from last session).
+      didResetOnLaunch.current = true;
       router.replace('/(app)');
     } else if (!isAuthenticated && !inAuthGroup) {
       if (state.isSignedIn && !state.selectedAccount) {

@@ -455,13 +455,12 @@ export function AuthContextProvider({ children }) {
         }
       },
       signOut: async () => {
-        dispatch({ type: "SET_LOADING", payload: true });
         try {
-          await AsyncStorage.removeItem("accessToken");
-          dispatch({ type: "SIGN_OUT" });
-        } finally {
-          dispatch({ type: "SET_LOADING", payload: false });
-        }
+          // Call server logout endpoint (best-effort)
+          await apiClient.post("/api/auth/logout").catch(() => {});
+        } catch (_) {}
+        await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
+        dispatch({ type: "SIGN_OUT" });
       },
       refreshUser: async () => {
         try {

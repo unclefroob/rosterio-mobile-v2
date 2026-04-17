@@ -78,6 +78,20 @@ const ProfileScreen = () => {
       style={styles.bg}
     >
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        {/* ── Persistent header — always visible, never scrolls away ── */}
+        <View style={styles.screenHeader}>
+          <Text style={styles.screenTitle}>Profile</Text>
+          <TouchableOpacity
+            onPress={handleLogout}
+            style={styles.headerLogoutBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Sign out"
+            accessibilityRole="button"
+          >
+            <Ionicons name="log-out-outline" size={24} color={glassTheme.colors.danger} />
+          </TouchableOpacity>
+        </View>
+
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
@@ -180,6 +194,25 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: glassTheme.glass.light.specular,
     zIndex: 1,
+  },
+
+  // Screen-level header row (always visible)
+  screenHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: glassTheme.colors.text.primary,
+    letterSpacing: -0.5,
+  },
+  headerLogoutBtn: {
+    padding: 4,
   },
 
   // Header section
