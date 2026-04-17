@@ -12,6 +12,7 @@ const glassHeaderOpts = {
     letterSpacing: -0.3,
   },
   headerBackTitleVisible: false,
+  headerBackButtonDisplayMode: 'minimal',
   headerShadowVisible: false,
 };
 

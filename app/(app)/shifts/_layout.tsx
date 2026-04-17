@@ -10,6 +10,7 @@ export default function ShiftsLayout() {
           headerShown: true,
           title: '',
           headerBackTitleVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
           headerStyle: { backgroundColor: glassTheme.colors.background.primary },
           headerTintColor: glassTheme.colors.text.primary,
           headerShadowVisible: false,

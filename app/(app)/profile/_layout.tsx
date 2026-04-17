@@ -16,6 +16,7 @@ const glassHeaderOpts = {
     letterSpacing: -0.3,
   },
   headerBackTitleVisible: false,
+  headerBackButtonDisplayMode: 'minimal',
 };
 
 export default function ProfileLayout() {
