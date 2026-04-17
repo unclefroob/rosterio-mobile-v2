@@ -28,7 +28,7 @@
     "expo-linking": "~55.0.12",
     "expo-location": "~55.1.8",
     "expo-router": "~55.0.12",
-    "react": "19.2.0",
+    "react": "^19.2.5",
     "react-native": "0.83.4",
     "react-native-gesture-handler": "~2.31.1",
     "react-native-pager-view": "6.6.1",
