@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import * as Location from "expo-location";
 import {
   View,
   Text,
@@ -33,6 +34,9 @@ import {
   searchStaff,
   completeShift,
   rejectShiftCompletion,
+  checkInToShift,
+  checkOutFromShift,
+  getShiftClockStatus,
 } from "../../services/apiHelper";
 import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import glassTheme from "../../theme/glassTheme";
@@ -129,6 +133,10 @@ const MyShiftsScreen = () => {
   const [completionStaffSearchResults, setCompletionStaffSearchResults] = useState([]);
   const [searchingCompletionStaff, setSearchingCompletionStaff] = useState(false);
   const [showCompletionStaffDropdown, setShowCompletionStaffDropdown] = useState(false);
+
+  // Check-in state
+  const [clockStatuses, setClockStatuses] = useState({});
+  const [checkingInShiftId, setCheckingInShiftId] = useState(null);
 
   const PAGE_SIZE = 10;
 
@@ -529,6 +537,94 @@ const MyShiftsScreen = () => {
     }
   };
 
+  // Load clock-in status for each upcoming shift
+  const loadClockStatuses = useCallback(async (shiftsToCheck) => {
+    const results = await Promise.all(
+      shiftsToCheck.map((shift) => getShiftClockStatus(shift._id))
+    );
+    setClockStatuses((prev) => {
+      const next = { ...prev };
+      shiftsToCheck.forEach((shift, i) => {
+        if (results[i].success) {
+          next[shift._id] = results[i].data;
+        }
+      });
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "upcoming" && shifts.length > 0) {
+      loadClockStatuses(shifts);
+    }
+  }, [shifts, activeTab, loadClockStatuses]);
+
+  const getGPSCoords = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") return null;
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      return { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+    } catch {
+      return null;
+    }
+  };
+
+  const refreshClockStatus = useCallback(async (shiftId) => {
+    const result = await getShiftClockStatus(shiftId);
+    if (result.success) {
+      setClockStatuses((prev) => ({ ...prev, [shiftId]: result.data }));
+    }
+  }, []);
+
+  const handleCheckIn = async (shift) => {
+    setCheckingInShiftId(shift._id);
+    try {
+      const coords = await getGPSCoords();
+      const result = await checkInToShift(shift._id, coords);
+      if (result.success) {
+        setClockStatuses((prev) => ({
+          ...prev,
+          [shift._id]: { isCheckedIn: true, clockEntry: result.data.clockEntry },
+        }));
+        toast.success("Checked in successfully");
+      } else {
+        Alert.alert("Check-In Failed", result.message || "Could not check in");
+        await refreshClockStatus(shift._id);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Could not complete check-in");
+      await refreshClockStatus(shift._id);
+    } finally {
+      setCheckingInShiftId(null);
+    }
+  };
+
+  const handleCheckOut = async (shift) => {
+    setCheckingInShiftId(shift._id);
+    try {
+      const coords = await getGPSCoords();
+      const result = await checkOutFromShift(shift._id, coords);
+      if (result.success) {
+        setClockStatuses((prev) => ({
+          ...prev,
+          [shift._id]: { isCheckedIn: false, clockEntry: result.data.clockEntry },
+        }));
+        toast.success("Checked out successfully");
+      } else {
+        Alert.alert("Check-Out Failed", result.message || "Could not check out");
+        await refreshClockStatus(shift._id);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Could not complete check-out");
+      await refreshClockStatus(shift._id);
+    } finally {
+      setCheckingInShiftId(null);
+    }
+  };
+
   const liquidGlass = Platform.OS === "ios" && isLiquidGlassAvailable();
   const CardContainer = liquidGlass ? GlassView : (BlurView || View);
   const cardProps = liquidGlass
@@ -557,12 +653,16 @@ const MyShiftsScreen = () => {
     const isPastShift = endDate && isPast(endDate);
     const isConfirmed = shift.confirmationStatus === "confirmed";
     const needsReview = isPastShift && !isConfirmed && shift.assignedUsers?.length > 0;
+    const isUpcoming = !isPastShift;
+    const clockStatus = clockStatuses[shift._id];
+    const isCheckedIn = clockStatus?.isCheckedIn ?? false;
+    const clockInTime = clockStatus?.clockEntry?.clockInTime;
 
     return (
       <TouchableOpacity
         key={shift._id}
         style={styles.shiftCard}
-        onPress={() => navigation.navigate("ShiftDetails", { shift, fromMyShifts: true })}
+        onPress={() => navigation.navigate("shift-details", { shift, fromMyShifts: true })}
         activeOpacity={0.7}
       >
         <CardContainer style={styles.shiftCardInner} {...cardProps}>
@@ -595,6 +695,14 @@ const MyShiftsScreen = () => {
                   <Text style={[styles.badgeText, { color: glassTheme.colors.warning }]}>Needs Review</Text>
                 </View>
               )}
+              {isUpcoming && isCheckedIn && (
+                <View style={[styles.badge, { backgroundColor: `${glassTheme.colors.success}20` }]}>
+                  <Ionicons name="radio-button-on" size={12} color={glassTheme.colors.success} />
+                  <Text style={[styles.badgeText, { color: glassTheme.colors.success }]}>
+                    {clockInTime ? `In since ${format(new Date(clockInTime), "h:mm a")}` : "Checked In"}
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -619,6 +727,41 @@ const MyShiftsScreen = () => {
               </TouchableOpacity>
             </View>
           )}
+          {isUpcoming && (
+            <View style={styles.shiftCardActions}>
+              {isCheckedIn ? (
+                <TouchableOpacity
+                  style={styles.checkOutButton}
+                  onPress={() => handleCheckOut(shift)}
+                  disabled={checkingInShiftId === shift._id}
+                >
+                  {checkingInShiftId === shift._id ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <>
+                      <Ionicons name="log-out-outline" size={18} color="#fff" />
+                      <Text style={styles.checkOutButtonText}>Check Out</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.checkInButton}
+                  onPress={() => handleCheckIn(shift)}
+                  disabled={checkingInShiftId === shift._id}
+                >
+                  {checkingInShiftId === shift._id ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <>
+                      <Ionicons name="log-in-outline" size={18} color="#fff" />
+                      <Text style={styles.checkInButtonText}>Check In</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </CardContainer>
       </TouchableOpacity>
     );
@@ -633,15 +776,15 @@ const MyShiftsScreen = () => {
     const getStatusColor = () => {
       if (request.status === "approved") return glassTheme.colors.success;
       if (request.status === "rejected") return glassTheme.colors.danger;
-      if (request.status === "proposed") return "#3b82f6";
+      if (request.status === "proposed") return glassTheme.colors.info;
       return glassTheme.colors.warning;
     };
 
     const getStatusBg = () => {
-      if (request.status === "approved") return "#dcfce7";
-      if (request.status === "rejected") return "#fee2e2";
-      if (request.status === "proposed") return "#dbeafe";
-      return "#fef3c7";
+      if (request.status === "approved") return `${glassTheme.colors.success}20`;
+      if (request.status === "rejected") return `${glassTheme.colors.danger}20`;
+      if (request.status === "proposed") return `${glassTheme.colors.info}18`;
+      return `${glassTheme.colors.warning}20`;
     };
 
     return (
@@ -1416,10 +1559,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   badgeSuccess: {
-    backgroundColor: "#dcfce7",
+    backgroundColor: `${glassTheme.colors.success}20`,
   },
   badgeWarning: {
-    backgroundColor: "#fef3c7",
+    backgroundColor: `${glassTheme.colors.warning}20`,
   },
   badgeText: {
     fontSize: 11,
@@ -1429,7 +1572,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#f3f4f6",
+    borderTopColor: glassTheme.border.color,
   },
   staffingRow: {
     flexDirection: "row",
@@ -1454,16 +1597,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: "#3b82f620",
+    backgroundColor: `${glassTheme.colors.info}15`,
     borderWidth: 1.5,
-    borderColor: "#3b82f6",
+    borderColor: glassTheme.colors.info,
     minHeight: 44, // Touch-friendly
   },
   swapButtonText: {
     marginLeft: 8,
     fontSize: 15,
     fontWeight: "700",
-    color: "#3b82f6",
+    color: glassTheme.colors.info,
   },
   completeButton: {
     flex: 1,
@@ -1504,11 +1647,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   swapRequestCardInner: {
-    backgroundColor: "#fff",
+    backgroundColor: glassTheme.colors.background.primary,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: glassTheme.border.color,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -1567,9 +1710,9 @@ const styles = StyleSheet.create({
   swapRequestShiftBox: {
     padding: 16,
     borderRadius: 12,
-    backgroundColor: "#f9fafb",
+    backgroundColor: glassTheme.colors.background.tertiary,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: glassTheme.border.color,
   },
   swapRequestShiftBoxEmpty: {
     borderStyle: "dashed",
@@ -1612,7 +1755,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 12,
     padding: 12,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: glassTheme.colors.background.tertiary,
     borderRadius: 12,
     borderLeftWidth: 3,
     borderLeftColor: glassTheme.colors.primary,
@@ -1690,7 +1833,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: glassTheme.colors.background.primary,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -1712,7 +1855,7 @@ const styles = StyleSheet.create({
   },
   modalShiftInfo: {
     padding: 16,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: glassTheme.colors.background.tertiary,
     borderRadius: 12,
     marginBottom: 20,
   },
@@ -1746,7 +1889,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   searchInput: {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: glassTheme.colors.background.tertiary,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -1764,7 +1907,7 @@ const styles = StyleSheet.create({
     top: "100%",
     left: 0,
     right: 0,
-    backgroundColor: "#fff",
+    backgroundColor: glassTheme.colors.background.primary,
     borderRadius: 8,
     marginTop: 4,
     maxHeight: 200,
@@ -1796,7 +1939,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
     borderRadius: 8,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: glassTheme.colors.background.tertiary,
     borderWidth: 1,
     borderColor: glassTheme.border.color,
   },
@@ -1835,7 +1978,7 @@ const styles = StyleSheet.create({
   },
   acceptWithoutProposingBox: {
     padding: 16,
-    backgroundColor: "#fef3c7",
+    backgroundColor: `${glassTheme.colors.warning}18`,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: glassTheme.colors.warning,
@@ -1875,7 +2018,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   modalButtonCancel: {
-    backgroundColor: "#fff",
+    backgroundColor: glassTheme.colors.background.primary,
     borderWidth: 1,
     borderColor: glassTheme.colors.text.tertiary,
   },
@@ -1907,6 +2050,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: glassTheme.colors.text.secondary,
     fontStyle: "italic",
+  },
+  checkInButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: glassTheme.colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    minWidth: 110,
+    justifyContent: "center",
+  },
+  checkInButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  checkOutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: glassTheme.colors.warning,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    minWidth: 110,
+    justifyContent: "center",
+  },
+  checkOutButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });
 

@@ -222,3 +222,45 @@ export const rejectShiftCompletion = async (shiftId, data) => {
   }
 };
 
+/**
+ * Shift Check-In / Check-Out API
+ */
+export const checkInToShift = async (shiftId, coords) => {
+  try {
+    const response = await apiClient.post(`/api/shifts/${shiftId}/checkin`, coords || {});
+    return response.data;
+  } catch (error) {
+    console.error("API Error checking in to shift:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error checking in to shift",
+    };
+  }
+};
+
+export const checkOutFromShift = async (shiftId, coords) => {
+  try {
+    const response = await apiClient.post(`/api/shifts/${shiftId}/checkout`, coords || {});
+    return response.data;
+  } catch (error) {
+    console.error("API Error checking out from shift:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error checking out from shift",
+    };
+  }
+};
+
+export const getShiftClockStatus = async (shiftId) => {
+  try {
+    const response = await apiClient.get(`/api/shifts/${shiftId}/clock-status`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error fetching clock status:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error fetching clock status",
+    };
+  }
+};
+
