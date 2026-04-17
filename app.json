@@ -6,25 +6,43 @@
     "scheme": "rosterio",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.moonyscreek.rosterio-mobile",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Rosterio uses your location to verify check-in and check-out at shift locations."
+      }
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.moonyscreek.rosteriomobile"
+      "package": "com.moonyscreek.rosteriomobile",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "TODO: run `eas init` to populate this"
+      }
     },
     "plugins": [
       "expo-router",
       "expo-asset",
       "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Rosterio uses your location to verify check-in and check-out at shift locations."
+        }
+      ],
       [
         "expo-build-properties",
         {
