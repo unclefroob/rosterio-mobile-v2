@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import * as Location from "expo-location";
 import {
   View,
@@ -85,6 +85,10 @@ const MyShiftsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
+  // Ref mirrors offset so loadData can read the current value without needing
+  // offset in its useCallback deps (which would cause the load-on-tab-change
+  // useEffect to re-fire on every pagination step).
+  const offsetRef = useRef(0);
   const [tabCounts, setTabCounts] = useState({
     upcoming: null,
     pendingClaims: null,
@@ -182,6 +186,7 @@ const MyShiftsScreen = () => {
     async (tab = activeTab, reset = false) => {
       try {
         if (reset) {
+          offsetRef.current = 0;
           setOffset(0);
           setShifts([]);
           setLoading(true);
@@ -189,7 +194,7 @@ const MyShiftsScreen = () => {
           setLoadingMore(true);
         }
 
-        const currentOffset = reset ? 0 : offset;
+        const currentOffset = reset ? 0 : offsetRef.current;
         const result = await getMyShiftsData(tab, PAGE_SIZE, currentOffset);
 
         if (result.success) {
@@ -200,7 +205,8 @@ const MyShiftsScreen = () => {
             setShifts((prev) => [...prev, ...newShifts]);
           }
           setHasMore(result.data.hasMore || false);
-          setOffset((prev) => prev + newShifts.length);
+          offsetRef.current += newShifts.length;
+          setOffset(offsetRef.current);
         } else {
           Alert.alert("Error", result.message || "Failed to load shifts");
         }
@@ -213,7 +219,7 @@ const MyShiftsScreen = () => {
         setRefreshing(false);
       }
     },
-    [activeTab, offset]
+    [activeTab] // offset removed from deps — read via offsetRef to avoid stale closures
   );
 
   // Handle navigation params when they change
@@ -234,6 +240,7 @@ const MyShiftsScreen = () => {
     if (initialTab) {
       setActiveTab((currentTab) => {
         if (initialTab !== currentTab) {
+          offsetRef.current = 0;
           setOffset(0);
           setShifts([]);
           // Clear params after using them
@@ -258,6 +265,7 @@ const MyShiftsScreen = () => {
       if (initialTab) {
         setActiveTab((currentTab) => {
           if (initialTab !== currentTab) {
+            offsetRef.current = 0;
             setOffset(0);
             setShifts([]);
             return initialTab;
@@ -278,15 +286,16 @@ const MyShiftsScreen = () => {
     if (activeTab !== "swapRequests") {
       loadData(activeTab, true);
     }
-  }, [activeTab]);
+  }, [activeTab, loadData]);
 
-  // Called by TabView when user swipes to a new tab
+  // Called by TabView when user swipes/taps to a new tab
   const handleTabIndexChange = useCallback((index) => {
     const newTab = TAB_ROUTES[index].key;
     if (newTab !== activeTab) {
-      setActiveTab(newTab);
+      offsetRef.current = 0;
       setOffset(0);
       setShifts([]);
+      setActiveTab(newTab);
     }
   }, [activeTab]);
 
@@ -1013,16 +1022,10 @@ const MyShiftsScreen = () => {
       <TabView
         style={styles.tabView}
         navigationState={{ index: tabIndex < 0 ? 0 : tabIndex, routes: TAB_ROUTES }}
-        renderScene={({ route }) => {
-          if (route.key !== activeTab) {
-            return (
-              <View
-                style={{ flex: 1, backgroundColor: glassTheme.colors.background.primary }}
-              />
-            );
-          }
-          return <View style={{ flex: 1 }}>{renderContent()}</View>;
-        }}
+        renderScene={() => (
+          <View style={{ flex: 1 }}>{renderContent()}</View>
+        )}
+        lazy
         onIndexChange={handleTabIndexChange}
         initialLayout={{ width: screenWidth }}
         renderTabBar={(props) => (
