@@ -40,10 +40,6 @@ const DashboardScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = useCallback(async () => {
-    if (!state.isSignedIn || !state.selectedAccount) {
-      setLoading(false);
-      return;
-    }
     try {
       const result = await getDashboardData();
       if (result.success) {
@@ -53,16 +49,12 @@ const DashboardScreen = () => {
       }
     } catch (error) {
       console.error("Error loading dashboard:", error);
-      // Don't show alert for auth errors — the auth gate will redirect to login
-      const isAuthError = error.response?.status === 401 || error.response?.status === 403;
-      if (!isAuthError) {
-        Alert.alert("Error", "Failed to load dashboard data");
-      }
+      Alert.alert("Error", "Failed to load dashboard data");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [state.isSignedIn, state.selectedAccount]);
+  }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
 
