@@ -28,11 +28,6 @@
       "package": "com.ardorio.rosterio",
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
-    "extra": {
-      "eas": {
-        "projectId": "TODO: run `eas init` to populate this"
-      }
-    },
     "plugins": [
       "expo-router",
       "expo-asset",
