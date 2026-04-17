@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { AuthContext } from "../../context/AuthContext";
 import { formatRole } from "../../utils/roleFormatter";
 import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
@@ -59,6 +60,7 @@ const GlassSection = ({ children, style }) => {
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const { state, signOut } = useContext(AuthContext);
+
 
   const handleLogout = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -141,7 +143,7 @@ const ProfileScreen = () => {
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.editButton}
-              onPress={() => navigation.navigate("edit-profile")}
+              onPress={() => router.push('/edit-profile')}
               activeOpacity={0.75}
             >
               <Ionicons name="create-outline" size={18} color={glassTheme.colors.primary} />

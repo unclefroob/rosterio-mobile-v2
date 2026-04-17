@@ -19,6 +19,7 @@ import { AuthContextProvider, useAuth } from '../src/context/AuthContext';
 import { PlanContextProvider } from '../src/context/PlanContext';
 import { ToastProvider } from '../src/components/Toast';
 import SplashScreen from '../src/screens/SplashScreen';
+import glassTheme from '../src/theme/glassTheme';
 
 function AuthGate() {
   const { state } = useAuth();
@@ -56,6 +57,26 @@ function AuthGate() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(app)" />
+      <Stack.Screen
+        name="edit-profile"
+        options={{
+          presentation: 'modal',
+          headerShown: true,
+          title: 'Edit Profile',
+          headerStyle: { backgroundColor: glassTheme.colors.background.primary },
+          headerTintColor: glassTheme.colors.primary,
+          headerTitleStyle: {
+            fontFamily: 'DMSans_600SemiBold',
+            fontWeight: '600',
+            fontSize: 17,
+            color: glassTheme.colors.text.primary,
+            letterSpacing: -0.3,
+          },
+          headerBackTitleVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
+          headerShadowVisible: false,
+        }}
+      />
     </Stack>
   );
 }

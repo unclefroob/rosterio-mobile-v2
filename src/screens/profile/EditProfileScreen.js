@@ -12,12 +12,13 @@ import {
   Platform
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "../../components/Toast";
 import { updateProfile, changePassword } from "../../services/apiHelper";
 import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import glassTheme from "../../theme/glassTheme";
-import { useNavigation, useRoute, CommonActions } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 let BlurView;
 try {
@@ -34,20 +35,16 @@ const EditProfileScreen = () => {
     route.params?.section || "profile"
   );
 
-  // Always inject a visible back button — works even when expo-router restores
-  // stale navigation state and the automatic back indicator is missing.
+  // Always inject a visible back button.
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => {
-            const stackState = navigation.getState();
-            if (stackState && stackState.index > 0) {
-              navigation.goBack();
+            if (router.canGoBack()) {
+              router.back();
             } else {
-              navigation.dispatch(
-                CommonActions.reset({ index: 0, routes: [{ name: "index" }] })
-              );
+              router.navigate('/(app)/profile');
             }
           }}
           style={{ paddingHorizontal: 8, paddingVertical: 4 }}
@@ -105,7 +102,11 @@ const EditProfileScreen = () => {
       if (result.success) {
         await refreshUser();
         toast.success("Profile updated successfully");
-        navigation.goBack();
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.navigate('/(app)/profile');
+        }
       } else {
         Alert.alert("Error", result.message || "Failed to update profile");
       }
