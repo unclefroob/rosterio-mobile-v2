@@ -21,6 +21,7 @@ import glassTheme from "../../theme/glassTheme";
 import { TAB_BAR_CONTENT_HEIGHT } from "../../components/LiquidTabBar";
 import { usePlan } from "../../context/PlanContext";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { useNavigation } from "@react-navigation/native";
 
 let BlurView;
 try {
@@ -29,7 +30,8 @@ try {
   BlurView = null;
 }
 
-const MarketplaceScreen = ({ navigation }) => {
+const MarketplaceScreen = () => {
+  const navigation = useNavigation();
   const { hasMarketplace, plan, loading: planLoading } = usePlan();
   const [shifts, setShifts] = useState([]);
   const [personalizedData, setPersonalizedData] = useState(new Map());
@@ -83,7 +85,7 @@ const MarketplaceScreen = ({ navigation }) => {
 
   const handleShiftPress = (shift) => {
     const personalized = personalizedData.get(shift._id.toString());
-    navigation.navigate("ShiftDetails", {
+    navigation.navigate("shift-details", {
       shift,
       personalized,
     });
@@ -410,7 +412,7 @@ const MarketplaceScreen = ({ navigation }) => {
         <Text style={styles.headerTitle}>Marketplace</Text>
         <TouchableOpacity
           style={styles.myClaimsButton}
-          onPress={() => navigation.navigate("MyClaims")}
+          onPress={() => navigation.navigate("my-claims")}
           activeOpacity={0.7}
         >
           <Ionicons name="receipt-outline" size={16} color={glassTheme.colors.primary} />
@@ -496,9 +498,9 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     minHeight: 44,
     borderRadius: 20,
-    backgroundColor: `${glassTheme.colors.primary}15`,
+    backgroundColor: `${glassTheme.colors.primary}20`,
     borderWidth: 1,
-    borderColor: `${glassTheme.colors.primary}30`,
+    borderColor: `${glassTheme.colors.primary}40`,
   },
   myClaimsButtonText: {
     fontSize: 13,
@@ -508,15 +510,15 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 16,
     marginVertical: 12,
     marginBottom: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: glassTheme.radius.large,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     ...glassTheme.shadows.small,
   },
   searchInput: {
@@ -534,11 +536,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   shiftCard: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderRadius: glassTheme.radius.large,
     padding: 20,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     overflow: "hidden",
     ...glassTheme.shadows.medium,
   },
@@ -595,11 +597,13 @@ const styles = StyleSheet.create({
   filledBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: `${glassTheme.colors.success}18`,
+    backgroundColor: `${glassTheme.colors.success}22`,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
     gap: 4,
+    borderWidth: 1,
+    borderColor: `${glassTheme.colors.success}55`,
   },
   filledBadgeText: {
     fontSize: 12,

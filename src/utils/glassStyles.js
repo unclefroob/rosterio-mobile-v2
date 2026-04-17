@@ -61,9 +61,9 @@ export const createGlassInput = (options = {}) => {
     borderRadius,
     paddingHorizontal: padding,
     paddingVertical: padding,
-    borderWidth: 0.5,
-    borderColor: glassColors.border,
-    backgroundColor: glassColors.backgroundSubtle,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.12)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     fontSize: 14,
     color: glassTheme.colors.text.primary,
   };

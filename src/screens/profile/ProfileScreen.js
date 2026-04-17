@@ -127,7 +127,7 @@ const ProfileScreen = () => {
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.editButton}
-              onPress={() => navigation.navigate("EditProfile")}
+              onPress={() => navigation.navigate("edit-profile")}
               activeOpacity={0.75}
             >
               <Ionicons name="create-outline" size={18} color={glassTheme.colors.primary} />
@@ -166,9 +166,9 @@ const styles = StyleSheet.create({
   glassCard: {
     borderRadius: glassTheme.radius.large,
     overflow: "hidden",
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
-    backgroundColor: glassTheme.glass.light.background,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
+    backgroundColor: "#FFFFFF",
     ...glassTheme.shadows.medium,
   },
   glassCardFallback: {
@@ -223,12 +223,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   rolePill: {
-    backgroundColor: `${glassTheme.colors.primary}18`,
+    backgroundColor: `${glassTheme.colors.primary}22`,
     paddingHorizontal: 14,
     paddingVertical: 5,
     borderRadius: glassTheme.radius.pill,
     borderWidth: 1,
-    borderColor: `${glassTheme.colors.primary}30`,
+    borderColor: `${glassTheme.colors.primary}55`,
   },
   rolePillText: {
     fontSize: 12,
@@ -295,10 +295,10 @@ const styles = StyleSheet.create({
   editButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderRadius: glassTheme.radius.large,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     paddingHorizontal: 16,
     paddingVertical: 16,
     gap: 10,

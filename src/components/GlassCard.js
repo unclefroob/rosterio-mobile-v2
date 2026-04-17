@@ -26,9 +26,9 @@ const GlassCard = ({
   style,
   borderRadius = glassTheme.radius.large,
   padding = glassTheme.spacing.lg,
-  borderWidth = 0.5,
-  borderColor = glassTheme.glass.light.border,
-  backgroundColor = glassTheme.glass.light.background,
+  borderWidth = 1,
+  borderColor = "rgba(0,0,0,0.09)",
+  backgroundColor = "#FFFFFF",
   showSpecular = true,
   shadow = "medium",
   ...props
@@ -88,8 +88,8 @@ const GlassCard = ({
       style={[
         ...sharedStyle,
         {
-          borderColor: "rgba(255,255,255,0.4)",
-          backgroundColor: "rgba(255,255,255,0.94)",
+          borderColor: "rgba(0,0,0,0.09)",
+          backgroundColor: "rgba(255,255,255,0.97)",
         },
       ]}
       {...props}

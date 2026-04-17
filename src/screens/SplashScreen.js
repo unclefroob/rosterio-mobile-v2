@@ -61,9 +61,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 52,
     borderRadius: glassTheme.radius.xlarge,
     overflow: "hidden",
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
-    backgroundColor: glassTheme.glass.light.background,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
+    backgroundColor: "#FFFFFF",
     ...glassTheme.shadows.large,
   },
   cardFallback: {

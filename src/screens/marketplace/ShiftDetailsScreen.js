@@ -20,8 +20,11 @@ import { formatCurrency } from "../../utils/formatCurrency";
 import { useAuth } from "../../context/AuthContext";
 import { requestShiftSwap, searchStaff } from "../../services/apiHelper";
 import glassTheme from "../../theme/glassTheme";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
-const ShiftDetailsScreen = ({ route, navigation }) => {
+const ShiftDetailsScreen = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
   const { shift: initialShift, fromMyShifts } = route.params;
   const { state } = useAuth();
   const [shift, setShift] = useState(initialShift);
@@ -659,7 +662,7 @@ const styles = StyleSheet.create({
     backgroundColor: glassTheme.colors.background.screen,
   },
   header: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     paddingVertical: 20,
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -682,12 +685,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   filledBadge: {
-    backgroundColor: `${glassTheme.colors.success}18`,
+    backgroundColor: `${glassTheme.colors.success}22`,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     flexDirection: "row",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: `${glassTheme.colors.success}55`,
   },
   filledBadgeText: {
     fontSize: 12,
@@ -696,14 +701,14 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   card: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 12,
     marginVertical: 8,
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderRadius: glassTheme.radius.large,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     ...glassTheme.shadows.small,
   },
   cardHeader: {
@@ -781,13 +786,16 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   requirementQuantity: {
-    backgroundColor: `${glassTheme.colors.warning}18`,
+    backgroundColor: `${glassTheme.colors.warning}22`,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: `${glassTheme.colors.warning}55`,
   },
   requirementQuantityFulfilled: {
-    backgroundColor: `${glassTheme.colors.success}18`,
+    backgroundColor: `${glassTheme.colors.success}22`,
+    borderColor: `${glassTheme.colors.success}55`,
   },
   requirementQuantityText: {
     fontSize: 12,
@@ -840,14 +848,14 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   claimStatusContainer: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 12,
     marginVertical: 16,
     paddingVertical: 20,
     borderRadius: glassTheme.radius.large,
     alignItems: "center",
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
   },
   claimStatusText: {
     fontSize: 16,
@@ -886,13 +894,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 20,
     maxHeight: "90%",
-    borderTopWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderTopWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
   },
   modalHeader: {
     flexDirection: "row",
@@ -907,11 +915,11 @@ const styles = StyleSheet.create({
   },
   modalShiftInfo: {
     padding: 16,
-    backgroundColor: glassTheme.glass.light.background,
+    backgroundColor: "#F7F7F7",
     borderRadius: glassTheme.radius.medium,
     marginBottom: 20,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
   },
   modalShiftInfoLabel: {
     fontSize: 12,
@@ -962,12 +970,12 @@ const styles = StyleSheet.create({
     top: "100%",
     left: 0,
     right: 0,
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderRadius: glassTheme.radius.medium,
     marginTop: 4,
     maxHeight: 200,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     zIndex: 1000,
     ...glassTheme.shadows.medium,
   },

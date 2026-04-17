@@ -14,8 +14,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { API_URL } from "../../config/api";
 import glassTheme from "../../theme/glassTheme";
+import { useNavigation } from "@react-navigation/native";
 
-const ForgotPasswordScreen = ({ navigation }) => {
+const ForgotPasswordScreen = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -69,7 +71,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
           </Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => navigation.navigate("login")}
             activeOpacity={0.8}
           >
             <Text style={styles.buttonText}>Back to Sign In</Text>
@@ -137,7 +139,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.backLink}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => navigation.navigate("login")}
           >
             <Text style={styles.backLinkText}>Back to sign in</Text>
           </TouchableOpacity>

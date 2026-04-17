@@ -117,36 +117,29 @@ const AppTabs = () => {
   );
 };
 
-const AuthNavigator = () => {
-  const { state } = useAuth();
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!state.isSignedIn ? (
-        <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-        </>
-      ) : (
-        <Stack.Screen
-          name="AccountSelect"
-          component={AccountSelectScreen}
-          options={{ animationEnabled: false }}
-        />
-      )}
-    </Stack.Navigator>
-  );
-};
-
 function RootNavigator() {
   const { state } = useAuth();
 
   if (state.isLoading) return <SplashScreen />;
 
-  const isAuthenticated = state.isSignedIn && state.selectedAccount;
-
   return (
     <NavigationContainer theme={AppTheme}>
-      {isAuthenticated ? <AppTabs /> : <AuthNavigator />}
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!state.isSignedIn ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          </>
+        ) : !state.selectedAccount ? (
+          <Stack.Screen
+            name="AccountSelect"
+            component={AccountSelectScreen}
+            options={{ animationEnabled: false }}
+          />
+        ) : (
+          <Stack.Screen name="App" component={AppTabs} />
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

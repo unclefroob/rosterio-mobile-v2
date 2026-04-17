@@ -783,7 +783,7 @@ const MyShiftsScreen = () => {
     const getStatusBg = () => {
       if (request.status === "approved") return `${glassTheme.colors.success}20`;
       if (request.status === "rejected") return `${glassTheme.colors.danger}20`;
-      if (request.status === "proposed") return `${glassTheme.colors.info}18`;
+      if (request.status === "proposed") return `${glassTheme.colors.info}22`;
       return `${glassTheme.colors.warning}20`;
     };
 
@@ -1452,9 +1452,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: glassTheme.radius.pill,
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     gap: 6,
     minHeight: 44,
     ...glassTheme.shadows.small,
@@ -1505,11 +1505,11 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   shiftCardInner: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderRadius: glassTheme.radius.large,
     padding: 20,
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     overflow: "hidden",
     ...glassTheme.shadows.medium,
   },
@@ -1597,7 +1597,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: `${glassTheme.colors.info}15`,
+    backgroundColor: `${glassTheme.colors.info}20`,
     borderWidth: 1.5,
     borderColor: glassTheme.colors.info,
     minHeight: 44, // Touch-friendly
@@ -1978,7 +1978,7 @@ const styles = StyleSheet.create({
   },
   acceptWithoutProposingBox: {
     padding: 16,
-    backgroundColor: `${glassTheme.colors.warning}18`,
+    backgroundColor: `${glassTheme.colors.warning}22`,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: glassTheme.colors.warning,

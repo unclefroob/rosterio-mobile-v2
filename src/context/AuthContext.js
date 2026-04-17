@@ -117,23 +117,38 @@ export function AuthContextProvider({ children }) {
                 
                 if (selectResponse.data.success) {
                   const { accountToken, account, role: selectedRole } = selectResponse.data.data;
-                  await AsyncStorage.setItem("accessToken", accountToken);
-                  // Preserve refresh token if it exists
-                  const existingRefreshToken = await AsyncStorage.getItem("refreshToken");
-                  if (existingRefreshToken) {
-                    await AsyncStorage.setItem("refreshToken", existingRefreshToken);
+                  const resolvedAccountId = account.id || account._id;
+                  if (!resolvedAccountId) {
+                    console.error("❌ select-account response missing account id on restore:", account);
+                    // Fall through to AccountSelectScreen
+                    dispatch({
+                      type: "SIGN_IN",
+                      payload: {
+                        token: userToken,
+                        user: { ...userData, accounts },
+                        selectedAccount: null,
+                        role: null,
+                      },
+                    });
+                  } else {
+                    await AsyncStorage.setItem("accessToken", accountToken);
+                    // Preserve refresh token if it exists
+                    const existingRefreshToken = await AsyncStorage.getItem("refreshToken");
+                    if (existingRefreshToken) {
+                      await AsyncStorage.setItem("refreshToken", existingRefreshToken);
+                    }
+
+                    dispatch({
+                      type: "SIGN_IN",
+                      payload: {
+                        token: accountToken,
+                        user: { ...userData, accounts, selectedAccount: resolvedAccountId, role: selectedRole },
+                        selectedAccount: resolvedAccountId,
+                        role: selectedRole,
+                      },
+                    });
                   }
-                  
-                  dispatch({
-                    type: "SIGN_IN",
-                    payload: {
-                      token: accountToken,
-                      user: { ...userData, accounts, selectedAccount: account.id, role: selectedRole },
-                      selectedAccount: account.id,
-                      role: selectedRole,
-                    },
-                  });
-                  console.log("✅ Auto-selected account on token restore:", account.name);
+                  console.log("✅ Auto-selected account on token restore:", account.name, "ID:", resolvedAccountId);
                 } else {
                   // Select failed, but still sign in with accounts so user can select
                   dispatch({
@@ -216,7 +231,6 @@ export function AuthContextProvider({ children }) {
   const authContext = React.useMemo(
     () => ({
       signIn: async (email, password) => {
-        dispatch({ type: "SET_LOADING", payload: true });
         try {
           console.log(`🔐 Attempting login to: ${API_URL}/api/auth/login`);
           const response = await axios.post(`${API_URL}/api/auth/login`, {
@@ -305,25 +319,31 @@ export function AuthContextProvider({ children }) {
 
               if (selectResponse.data.success) {
                   const { accountToken, account, role: selectedRole } = selectResponse.data.data;
-                  await AsyncStorage.setItem("accessToken", accountToken);
-                  // Preserve refresh token if it exists
-                  const existingRefreshToken = await AsyncStorage.getItem("refreshToken");
-                  if (existingRefreshToken) {
-                    await AsyncStorage.setItem("refreshToken", existingRefreshToken);
+                  const resolvedAccountId = account.id || account._id;
+                  if (!resolvedAccountId) {
+                    console.error("❌ select-account response missing account id:", account);
+                    // Fall through to AccountSelectScreen
+                  } else {
+                    await AsyncStorage.setItem("accessToken", accountToken);
+                    // Preserve refresh token if it exists
+                    const existingRefreshToken = await AsyncStorage.getItem("refreshToken");
+                    if (existingRefreshToken) {
+                      await AsyncStorage.setItem("refreshToken", existingRefreshToken);
+                    }
+
+                    dispatch({
+                      type: "SIGN_IN",
+                      payload: {
+                        token: accountToken,
+                        user: { ...user, accounts: accounts || [], selectedAccount: resolvedAccountId, role: selectedRole },
+                        selectedAccount: resolvedAccountId,
+                        role: selectedRole,
+                      },
+                    });
+
+                    console.log("✅ Auto-selected account:", account.name, "ID:", resolvedAccountId);
+                    return { success: true };
                   }
-                  
-                  dispatch({
-                    type: "SIGN_IN",
-                    payload: {
-                      token: accountToken,
-                      user: { ...user, accounts: accounts || [], selectedAccount: account.id, role: selectedRole },
-                      selectedAccount: account.id,
-                      role: selectedRole,
-                    },
-                  });
-                  
-                  console.log("✅ Auto-selected account:", account.name);
-                  return { success: true };
               } else {
                 console.error("❌ Select account API returned success: false", selectResponse.data.message);
               }
@@ -375,8 +395,6 @@ export function AuthContextProvider({ children }) {
               error.message ||
               "Login failed. Please check your connection and try again.",
           };
-        } finally {
-          dispatch({ type: "SET_LOADING", payload: false });
         }
       },
       selectAccount: async (accountId) => {

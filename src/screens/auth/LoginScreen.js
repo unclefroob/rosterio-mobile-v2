@@ -17,11 +17,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import { useAuth } from "../../context/AuthContext";
 import glassTheme from "../../theme/glassTheme";
+import { useNavigation } from "@react-navigation/native";
 
 let BlurView;
 try { BlurView = require("expo-blur").BlurView; } catch (e) { BlurView = null; }
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
+  const navigation = useNavigation();
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -158,7 +160,7 @@ const LoginScreen = ({ navigation }) => {
         {/* Forgot password */}
         <TouchableOpacity
           style={styles.forgotRow}
-          onPress={() => navigation.navigate("ForgotPassword")}
+          onPress={() => navigation.navigate("forgot-password")}
         >
           <Text style={styles.forgotText}>Forgot your password?</Text>
         </TouchableOpacity>
@@ -214,9 +216,9 @@ const styles = StyleSheet.create({
   formCard: {
     borderRadius: glassTheme.radius.xlarge,
     overflow: "hidden",
-    borderWidth: 0.5,
-    borderColor: glassTheme.glass.light.border,
-    backgroundColor: glassTheme.glass.light.background,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
+    backgroundColor: "#FFFFFF",
     padding: 24,
     ...glassTheme.shadows.large,
     marginBottom: 20,

@@ -62,21 +62,21 @@ const MyClaimsScreen = () => {
     switch (status) {
       case "approved":
         return {
-          bg: `${glassTheme.colors.success}18`,
+          bg: `${glassTheme.colors.success}22`,
           text: glassTheme.colors.success,
           icon: "checkmark-circle",
           label: "Approved",
         };
       case "rejected":
         return {
-          bg: `${glassTheme.colors.danger}15`,
+          bg: `${glassTheme.colors.danger}20`,
           text: glassTheme.colors.danger,
           icon: "close-circle",
           label: "Rejected",
         };
       case "pending":
         return {
-          bg: `${glassTheme.colors.warning}18`,
+          bg: `${glassTheme.colors.warning}22`,
           text: glassTheme.colors.warning,
           icon: "hourglass",
           label: "Pending",
@@ -296,13 +296,13 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderRadius: glassTheme.radius.medium,
     paddingVertical: 14,
     paddingHorizontal: 8,
     alignItems: "center",
-    borderWidth: glassTheme.border.width,
-    borderColor: glassTheme.border.color,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     shadowColor: glassTheme.shadow.color,
     shadowOffset: glassTheme.shadow.offset,
     shadowOpacity: glassTheme.shadow.opacity,
@@ -329,13 +329,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   claimCard: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderRadius: glassTheme.radius.large,
     padding: 16,
     marginBottom: 12,
     marginTop: 4,
-    borderWidth: glassTheme.border.width,
-    borderColor: glassTheme.border.color,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     shadowColor: glassTheme.shadow.color,
     shadowOffset: glassTheme.shadow.offset,
     shadowOpacity: glassTheme.shadow.opacity,
@@ -404,11 +404,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: `${glassTheme.colors.success}18`,
+    backgroundColor: `${glassTheme.colors.success}22`,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: glassTheme.radius.small,
     marginTop: 10,
+    borderWidth: 1,
+    borderColor: `${glassTheme.colors.success}55`,
   },
   completedText: {
     fontSize: 12,

@@ -17,6 +17,7 @@ import { toast } from "../../components/Toast";
 import { updateProfile, changePassword } from "../../services/apiHelper";
 import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import glassTheme from "../../theme/glassTheme";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 let BlurView;
 try {
@@ -25,7 +26,9 @@ try {
   BlurView = null;
 }
 
-const EditProfileScreen = ({ navigation, route }) => {
+const EditProfileScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
   const { state, refreshUser } = useAuth();
   const [activeSection, setActiveSection] = useState(
     route.params?.section || "profile"
@@ -429,11 +432,11 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   card: {
-    backgroundColor: glassTheme.glass.light.backgroundStrong,
+    backgroundColor: "#FFFFFF",
     borderRadius: glassTheme.radius.large,
     padding: 20,
-    borderWidth: glassTheme.border.width,
-    borderColor: glassTheme.border.color,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.09)",
     shadowColor: glassTheme.shadow.color,
     shadowOffset: glassTheme.shadow.offset,
     shadowOpacity: glassTheme.shadow.opacity,
