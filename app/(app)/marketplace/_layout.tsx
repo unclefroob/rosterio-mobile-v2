@@ -1,8 +1,4 @@
 import { Stack } from 'expo-router';
-
-export const unstable_settings = {
-  initialRouteName: 'index',
-};
 import glassTheme from '../../../src/theme/glassTheme';
 
 const glassHeaderOpts = {
