@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import glassTheme from "../../theme/glassTheme";
 import { TAB_BAR_CONTENT_HEIGHT } from "../../components/LiquidTabBar";
 import { usePlan } from "../../context/PlanContext";
 import { formatCurrency } from "../../utils/formatCurrency";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 let BlurView;
 try {
@@ -38,6 +38,9 @@ const MarketplaceScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  // Tracks whether a successful data fetch has already completed so the
+  // useFocusEffect below only retries when data is genuinely absent.
+  const dataFetchedRef = useRef(false);
 
   const loadShifts = useCallback(async () => {
     try {
@@ -59,6 +62,7 @@ const MarketplaceScreen = () => {
 
         setShifts(shiftsData);
         setPersonalizedData(personalizedMap);
+        dataFetchedRef.current = true;
       }
     } catch (error) {
       console.error("Error loading shifts:", error);
@@ -69,14 +73,32 @@ const MarketplaceScreen = () => {
     }
   }, []);
 
+  // Primary trigger: load shifts once hasMarketplace is true.
+  // This fires on mount and on any hasMarketplace transition (false → true).
+  // While planLoading is still true we stay in the spinner state — don't flip
+  // loading to false prematurely or we'll flash the "Not Available" screen.
   useEffect(() => {
     if (hasMarketplace) {
       loadShifts();
-    } else {
+    } else if (!planLoading) {
+      // Plan has settled and this account has no marketplace access.
       setLoading(false);
     }
+    // planLoading intentionally omitted: we only care when hasMarketplace changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMarketplace]);
+
+  // Fallback trigger: when the screen comes into focus and hasMarketplace is true
+  // but no data has loaded yet, retry the fetch. Uses dataFetchedRef (not loading)
+  // as the guard so the callback deps don't change on every loading toggle.
+  useFocusEffect(
+    useCallback(() => {
+      if (hasMarketplace && !dataFetchedRef.current) {
+        setLoading(true);
+        loadShifts();
+      }
+    }, [hasMarketplace, loadShifts])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);

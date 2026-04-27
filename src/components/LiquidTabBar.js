@@ -49,17 +49,29 @@ export const TAB_BAR_CONTENT_HEIGHT = 56;
 export const TAB_BAR_BOTTOM_INSET = TAB_BAR_CONTENT_HEIGHT + 16;
 
 const ICONS = {
+  // App.js (React Navigation) route names
   Dashboard:   { focused: "home",          unfocused: "home-outline",          lib: "Ionicons" },
   Marketplace: { focused: "storefront",    unfocused: "storefront-outline",    lib: "MCI"      },
   MyShifts:    { focused: "calendar",      unfocused: "calendar-outline",      lib: "Ionicons" },
   Profile:     { focused: "person-circle", unfocused: "person-circle-outline", lib: "Ionicons" },
+  // Expo Router file-system route names
+  index:       { focused: "home",          unfocused: "home-outline",          lib: "Ionicons" },
+  marketplace: { focused: "storefront",    unfocused: "storefront-outline",    lib: "MCI"      },
+  shifts:      { focused: "calendar",      unfocused: "calendar-outline",      lib: "Ionicons" },
+  profile:     { focused: "person-circle", unfocused: "person-circle-outline", lib: "Ionicons" },
 };
 
 const LABELS = {
+  // App.js (React Navigation) route names
   Dashboard:   "Home",
   Marketplace: "Market",
   MyShifts:    "Shifts",
   Profile:     "Profile",
+  // Expo Router file-system route names
+  index:       "Home",
+  marketplace: "Market",
+  shifts:      "Shifts",
+  profile:     "Profile",
 };
 
 // ─── Single tab item ───────────────────────────────────────────

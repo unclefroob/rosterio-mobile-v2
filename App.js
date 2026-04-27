@@ -5,7 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts, DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from "@expo-google-fonts/dm-sans";
 import { AuthContextProvider, useAuth } from "./src/context/AuthContext";
-import { PlanContextProvider, usePlan } from "./src/context/PlanContext";
+import { PlanContextProvider } from "./src/context/PlanContext";
 import { ToastProvider } from "./src/components/Toast";
 import LiquidTabBar from "./src/components/LiquidTabBar";
 import glassTheme from "./src/theme/glassTheme";
@@ -86,11 +86,6 @@ const ProfileNavigator = () => (
 );
 
 const AppTabs = () => {
-  const { hasMarketplace } = usePlan();
-  // Don't block on planLoading — render tabs immediately after auth.
-  // hasMarketplace defaults to false until plan resolves, so Marketplace
-  // tab simply appears once loaded rather than blocking navigation.
-
   return (
     <Tab.Navigator
       tabBar={(props) => <LiquidTabBar {...props} />}
@@ -108,9 +103,7 @@ const AppTabs = () => {
       }}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: "Home" }} />
-      {hasMarketplace && (
-        <Tab.Screen name="Marketplace" component={MarketplaceNavigator} options={{ title: "Market" }} />
-      )}
+      <Tab.Screen name="Marketplace" component={MarketplaceNavigator} options={{ title: "Market" }} />
       <Tab.Screen name="MyShifts" component={MyShiftsNavigator} options={{ title: "Shifts" }} />
       <Tab.Screen name="Profile" component={ProfileNavigator} options={{ title: "Profile" }} />
     </Tab.Navigator>
