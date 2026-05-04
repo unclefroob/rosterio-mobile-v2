@@ -25,12 +25,18 @@
     },
     "preview": {
       "distribution": "internal",
+      "ios": {
+        "image": "latest"
+      },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.rosterio.app"
       }
     },
     "production": {
       "autoIncrement": true,
+      "ios": {
+        "image": "latest"
+      },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.rosterio.app"
       }
