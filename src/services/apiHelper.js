@@ -20,10 +20,10 @@ export const getDashboardData = async () => {
 /**
  * My Shifts API
  */
-export const getMyShiftsData = async (tab, limit = 10, offset = 0, dateRange = {}) => {
+export const getMyShiftsData = async (tab, limit = 10, offset = 0, dateRange = {}, scope) => {
   try {
     const response = await apiClient.get("/api/pages/my-shifts", {
-      params: { tab, limit, offset, ...dateRange },
+      params: { tab, limit, offset, ...dateRange, ...(scope ? { scope } : {}) },
     });
     return response.data;
   } catch (error) {
@@ -35,9 +35,11 @@ export const getMyShiftsData = async (tab, limit = 10, offset = 0, dateRange = {
   }
 };
 
-export const getMyShiftsCounts = async () => {
+export const getMyShiftsCounts = async (scope) => {
   try {
-    const response = await apiClient.get("/api/pages/my-shifts/counts");
+    const response = await apiClient.get("/api/pages/my-shifts/counts", {
+      params: scope ? { scope } : {},
+    });
     return response.data;
   } catch (error) {
     console.error("API Error fetching my shifts counts:", error);

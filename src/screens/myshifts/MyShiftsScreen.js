@@ -62,6 +62,12 @@ const MyShiftsScreen = () => {
   const route = useRoute();
   const { state } = useAuth();
   const { width: screenWidth } = useWindowDimensions();
+
+  // Managers and super_admins see shifts at locations they manage on the
+  // Review tab — matching the dashboard "needs review" count semantics.
+  // Plain staff continue to see only their own assigned shifts.
+  const isManagerScope = state.role === "super_admin" || state.role === "manager";
+  const reviewScope = isManagerScope ? "managed" : undefined;
   
   // Get initial tab from route params, or default to "upcoming"
   const getInitialTab = () => {
@@ -145,14 +151,14 @@ const MyShiftsScreen = () => {
   // Load tab counts
   const loadTabCounts = useCallback(async () => {
     try {
-      const result = await getMyShiftsCounts();
+      const result = await getMyShiftsCounts(reviewScope);
       if (result.success) {
         setTabCounts(result.data.counts || {});
       }
     } catch (error) {
       console.error("Error loading tab counts:", error);
     }
-  }, []);
+  }, [reviewScope]);
 
   // Load swap requests
   const loadSwapRequests = useCallback(async () => {
@@ -193,7 +199,8 @@ const MyShiftsScreen = () => {
         }
 
         const currentOffset = reset ? 0 : offsetRef.current;
-        const result = await getMyShiftsData(tab, PAGE_SIZE, currentOffset);
+        const scopeForTab = tab === "needsReview" ? reviewScope : undefined;
+        const result = await getMyShiftsData(tab, PAGE_SIZE, currentOffset, {}, scopeForTab);
 
         if (result.success) {
           const newShifts = result.data.shifts || [];
@@ -217,7 +224,7 @@ const MyShiftsScreen = () => {
         setRefreshing(false);
       }
     },
-    [activeTab] // offset removed from deps — read via offsetRef to avoid stale closures
+    [activeTab, reviewScope] // offset removed from deps — read via offsetRef to avoid stale closures
   );
 
   // Handle navigation params when they change
