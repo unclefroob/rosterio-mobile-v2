@@ -177,6 +177,7 @@ const EditProfileScreen = () => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
         showsVerticalScrollIndicator={false}
         bounces={true}
         alwaysBounceVertical={true}
