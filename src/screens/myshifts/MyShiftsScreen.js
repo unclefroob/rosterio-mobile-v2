@@ -31,7 +31,7 @@ import {
   proposeShiftForSwap,
   rejectSwapRequest,
   cancelSwapRequest,
-  searchStaff,
+  searchSwapCandidates,
   completeShift,
   rejectShiftCompletion,
   checkInToShift,
@@ -325,9 +325,15 @@ const MyShiftsScreen = () => {
     }
   };
 
-  // User search for swap
+  // User search for swap — calls the shift-aware swap-candidates endpoint
+  // so results are filtered by location + the shift's eligibility rules.
   const searchUsersForSwap = useCallback(async (query) => {
     if (!query || query.trim().length < 2) {
+      setUserSearchResults([]);
+      setShowUserDropdown(false);
+      return;
+    }
+    if (!selectedShiftForSwap?._id) {
       setUserSearchResults([]);
       setShowUserDropdown(false);
       return;
@@ -335,10 +341,10 @@ const MyShiftsScreen = () => {
 
     setSearchingUsers(true);
     try {
-      const result = await searchStaff({ q: query });
+      const result = await searchSwapCandidates(selectedShiftForSwap._id, query);
       if (result.success) {
-        const filtered = (result.data.staff || []).filter(
-          (user) => user._id !== state.user?._id && user._id !== targetUserId
+        const filtered = (result.data.candidates || []).filter(
+          (user) => user._id !== targetUserId
         );
         setUserSearchResults(filtered);
         setShowUserDropdown(filtered.length > 0);
@@ -348,22 +354,23 @@ const MyShiftsScreen = () => {
     } finally {
       setSearchingUsers(false);
     }
-  }, [state.user, targetUserId]);
+  }, [selectedShiftForSwap?._id, targetUserId]);
 
   const loadUserSuggestions = useCallback(async () => {
+    if (!selectedShiftForSwap?._id) {
+      setUserSuggestions([]);
+      return;
+    }
     try {
-      const result = await searchStaff({ limit: 8 });
+      const result = await searchSwapCandidates(selectedShiftForSwap._id, undefined, 8);
       if (result.success) {
-        const filtered = (result.data.staff || []).filter(
-          (user) => user._id !== state.user?._id
-        );
-        setUserSuggestions(filtered);
-        setShowUserDropdown(filtered.length > 0);
+        setUserSuggestions(result.data.candidates || []);
+        setShowUserDropdown((result.data.candidates || []).length > 0);
       }
     } catch (error) {
       console.error("Error loading user suggestions:", error);
     }
-  }, [state.user]);
+  }, [selectedShiftForSwap?._id]);
 
   // Handle request swap
   const handleRequestSwap = async () => {

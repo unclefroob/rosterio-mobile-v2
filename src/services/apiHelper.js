@@ -167,6 +167,29 @@ export const searchStaff = async (params = {}) => {
 };
 
 /**
+ * Fetch users eligible to swap into a specific shift.
+ * Filters by the shift's location and excludes the requester + already-assigned users.
+ */
+export const searchSwapCandidates = async (shiftId, q, limit) => {
+  if (!shiftId) {
+    return { success: false, message: "shiftId is required" };
+  }
+  try {
+    const params = {};
+    if (q) params.q = q;
+    if (limit) params.limit = limit;
+    const response = await apiClient.get(`/api/shifts/${shiftId}/swap-candidates`, { params });
+    return response.data;
+  } catch (error) {
+    console.error("API Error fetching swap candidates:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error fetching swap candidates",
+    };
+  }
+};
+
+/**
  * Profile API
  */
 export const updateProfile = async (profileData) => {
