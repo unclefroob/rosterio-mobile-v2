@@ -1,14 +1,13 @@
 /**
  * Root layout for the expo-router spike.
  *
- * Wraps the entire tree in the same providers used by App.js and handles
- * the auth redirect:
- *   - isLoading      → show nothing (SplashScreen rendered inline)
- *   - authenticated  → redirect to (app)
- *   - not authed     → redirect to (auth)
+ * Wraps the entire tree in the same providers used by App.js and forks at
+ * the top level on `@kiosk:mode`:
+ *   - kioskMode === true   → mount the (kiosk) Stack only (no auth, no tabs)
+ *   - kioskMode === false  → existing AuthGate (auth + tabs)
  *
- * Toggle: to use this layout instead of App.js, change package.json#main
- * from "index.js" to "expo-router/entry".
+ * The fork happens BEFORE AuthContext bootstrap so a kiosk device never
+ * triggers user-token refresh / login redirects.
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -17,6 +16,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthContextProvider, useAuth } from '../src/context/AuthContext';
 import { PlanContextProvider } from '../src/context/PlanContext';
+import { KioskContextProvider, useKiosk } from '../src/context/KioskContext';
 import { ToastProvider } from '../src/components/Toast';
 import SplashScreen from '../src/screens/SplashScreen';
 import glassTheme from '../src/theme/glassTheme';
@@ -32,14 +32,15 @@ function AuthGate() {
     if (state.isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inKioskGroup = segments[0] === '(kiosk)';
     const isAuthenticated = state.isSignedIn && state.selectedAccount;
 
+    // Don't redirect into (app) while a manager is over on /(kiosk)/pair
+    // setting up a device — they navigated there explicitly from the auth
+    // screen and haven't logged in.
+    if (inKioskGroup) return;
+
     if (isAuthenticated && (inAuthGroup || !didResetOnLaunch.current)) {
-      // Navigate to app root whenever:
-      //   a) we're on an auth screen but already authenticated (post-login redirect)
-      //   b) first time resolving authenticated state this session — this replace
-      //      creates a *fresh* (app) navigation tree, discarding any persisted
-      //      sub-stack state (e.g. profile/edit-profile restored from last session).
       didResetOnLaunch.current = true;
       router.replace('/(app)');
     } else if (!isAuthenticated && !inAuthGroup) {
@@ -57,6 +58,7 @@ function AuthGate() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(app)" />
+      <Stack.Screen name="(kiosk)" />
       <Stack.Screen
         name="edit-profile"
         options={{
@@ -81,17 +83,56 @@ function AuthGate() {
   );
 }
 
+function KioskRootStack() {
+  // Kiosk mode bypasses AuthContextProvider entirely — no token refresh, no
+  // tabs, no manager UI. expo-router still needs the (auth) / (app) screens
+  // declared so a manager can navigate to /(auth)/login from the unpair flow,
+  // but we don't mount the auth provider; those screens will fail to render
+  // gracefully if reached without an unpair (which clears @kiosk:mode first).
+  return (
+    <Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
+      <Stack.Screen name="(kiosk)" />
+    </Stack>
+  );
+}
+
+function RootGate() {
+  const { hydrated, kioskMode } = useKiosk();
+  const segments = useSegments();
+
+  // Drive the post-hydration redirect: when kiosk mode is on, push to the
+  // (kiosk) tree if we're not already there.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (kioskMode && segments[0] !== '(kiosk)') {
+      router.replace('/(kiosk)');
+    }
+  }, [hydrated, kioskMode, segments]);
+
+  if (!hydrated) return <SplashScreen />;
+
+  if (kioskMode) {
+    return <KioskRootStack />;
+  }
+
+  return (
+    <AuthContextProvider>
+      <PlanContextProvider>
+        <ToastProvider>
+          <AuthGate />
+        </ToastProvider>
+      </PlanContextProvider>
+    </AuthContextProvider>
+  );
+}
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AuthContextProvider>
-          <PlanContextProvider>
-            <ToastProvider>
-              <AuthGate />
-            </ToastProvider>
-          </PlanContextProvider>
-        </AuthContextProvider>
+        <KioskContextProvider>
+          <RootGate />
+        </KioskContextProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
