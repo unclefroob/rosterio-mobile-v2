@@ -7,7 +7,9 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -549,7 +551,16 @@ const ShiftDetailsScreen = () => {
         onRequestClose={() => setShowSwapModal(false)}
       >
         <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.modalKeyboardAvoid}
+          >
           <View style={styles.modalContent}>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              showsVerticalScrollIndicator={false}
+            >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Request Shift Swap</Text>
               <TouchableOpacity onPress={() => setShowSwapModal(false)} style={{ padding: 12 }}>
@@ -650,7 +661,9 @@ const ShiftDetailsScreen = () => {
                 )}
               </TouchableOpacity>
             </View>
+            </ScrollView>
           </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
     </SafeAreaView>
@@ -890,6 +903,10 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.42)",
+    justifyContent: "flex-end",
+  },
+  modalKeyboardAvoid: {
+    flex: 1,
     justifyContent: "flex-end",
   },
   modalContent: {

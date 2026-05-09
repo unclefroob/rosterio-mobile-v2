@@ -10,6 +10,7 @@ import {
   RefreshControl,
   Alert,
   TextInput,
+  KeyboardAvoidingView,
   Modal,
   FlatList,
   Platform,
@@ -1162,7 +1163,16 @@ const MyShiftsScreen = () => {
         onRequestClose={() => setShowSwapModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.modalKeyboardAvoid}
+          >
+            <View style={styles.modalContent}>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                showsVerticalScrollIndicator={false}
+              >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Request Shift Swap</Text>
               <TouchableOpacity
@@ -1261,7 +1271,9 @@ const MyShiftsScreen = () => {
                 )}
               </TouchableOpacity>
             </View>
-          </View>
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
 
@@ -1398,7 +1410,16 @@ const MyShiftsScreen = () => {
         onRequestClose={() => setShowCompleteModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentScroll} keyboardShouldPersistTaps="handled">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.modalKeyboardAvoid}
+          >
+          <ScrollView
+            style={styles.modalContent}
+            contentContainerStyle={styles.modalContentScroll}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Complete Shift</Text>
               <TouchableOpacity onPress={() => setShowCompleteModal(false)} accessibilityRole="button" accessibilityLabel="Close">
@@ -1578,6 +1599,7 @@ const MyShiftsScreen = () => {
               </TouchableOpacity>
             </View>
           </ScrollView>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
     </SafeAreaView>
@@ -2001,6 +2023,10 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalKeyboardAvoid: {
+    flex: 1,
     justifyContent: "flex-end",
   },
   modalContent: {

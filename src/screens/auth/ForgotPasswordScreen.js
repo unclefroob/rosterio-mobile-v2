@@ -83,7 +83,7 @@ const ForgotPasswordScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
       <LinearGradient
@@ -91,11 +91,13 @@ const ForgotPasswordScreen = () => {
         start={{ x: 0.1, y: 0 }}
         end={{ x: 0.9, y: 1 }}
         style={StyleSheet.absoluteFill}
+        pointerEvents="none"
       />
       <ScrollView
         style={StyleSheet.absoluteFill}
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
       >
         <View style={styles.content}>
           <Text style={styles.title}>Forgot password?</Text>

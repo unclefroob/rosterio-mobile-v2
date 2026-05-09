@@ -480,6 +480,8 @@ const MarketplaceScreen = () => {
         renderItem={renderShiftCard}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         scrollEnabled={true}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
