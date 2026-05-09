@@ -18,6 +18,7 @@ import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import { useAuth } from "../../context/AuthContext";
 import glassTheme from "../../theme/glassTheme";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 let BlurView;
 try { BlurView = require("expo-blur").BlurView; } catch (e) { BlurView = null; }
@@ -166,6 +167,17 @@ const LoginScreen = () => {
         >
           <Text style={styles.forgotText}>Forgot your password?</Text>
         </TouchableOpacity>
+
+        {/* Kiosk setup — surfaced for managers who tap into a fresh device */}
+        <TouchableOpacity
+          style={styles.kioskRow}
+          onPress={() => router.push("/(kiosk)/pair")}
+          accessibilityRole="button"
+          accessibilityLabel="Set up kiosk"
+        >
+          <Ionicons name="qr-code-outline" size={16} color={glassTheme.colors.text.tertiary} />
+          <Text style={styles.kioskText}>I'm setting up a kiosk</Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -303,6 +315,21 @@ const styles = StyleSheet.create({
   forgotText: {
     fontSize: 14,
     color: glassTheme.colors.text.secondary,
+    fontWeight: "500",
+  },
+
+  // Kiosk setup link
+  kioskRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  kioskText: {
+    fontSize: 13,
+    color: glassTheme.colors.text.tertiary,
     fontWeight: "500",
   },
 });

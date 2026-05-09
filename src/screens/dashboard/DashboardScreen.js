@@ -15,6 +15,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { format, isToday, isTomorrow } from "date-fns";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { getDashboardData } from "../../services/apiHelper";
 import glassTheme from "../../theme/glassTheme";
@@ -209,6 +210,13 @@ const DashboardScreen = () => {
                   label="Active Staff"
                   value={data.stats?.staffCount || 0}
                   color={glassTheme.colors.primary}
+                />
+                <StatCard
+                  icon="pulse-outline"
+                  label="Live Attendance"
+                  value={data.stats?.workersClockedInCount ?? "→"}
+                  color={glassTheme.colors.success}
+                  onPress={() => router.push("/manager-attendance")}
                 />
                 {data.stats?.pendingSwapRequestsCount > 0 && (
                   <StatCard
