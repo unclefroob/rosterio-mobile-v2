@@ -289,3 +289,90 @@ export const getShiftClockStatus = async (shiftId) => {
   }
 };
 
+/**
+ * Live attendance / on-behalf-of API (manager role).
+ *
+ * Routes (resolved by the API contract broker):
+ *   GET  /api/locations/:id/zone-roster
+ *   POST /api/shifts/:shiftId/clockin/on-behalf            { workerId, reason? }
+ *   POST /api/shifts/:shiftId/clockout/on-behalf           { workerId, reason? }
+ *   POST /api/clockentries/:id/breaks/start/on-behalf      { reason? }
+ *   POST /api/clockentries/:id/breaks/end/on-behalf        { reason? }
+ */
+export const getZoneRoster = async (locationId) => {
+  try {
+    const response = await apiClient.get(`/api/locations/${locationId}/zone-roster`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error fetching zone roster:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error fetching zone roster",
+    };
+  }
+};
+
+export const clockInOnBehalf = async (shiftId, workerId, reason) => {
+  try {
+    const response = await apiClient.post(
+      `/api/shifts/${shiftId}/clockin/on-behalf`,
+      { workerId, ...(reason ? { reason } : {}) }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("API Error clock-in on behalf:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error clocking in worker",
+    };
+  }
+};
+
+export const clockOutOnBehalf = async (shiftId, workerId, reason) => {
+  try {
+    const response = await apiClient.post(
+      `/api/shifts/${shiftId}/clockout/on-behalf`,
+      { workerId, ...(reason ? { reason } : {}) }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("API Error clock-out on behalf:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error clocking out worker",
+    };
+  }
+};
+
+export const startBreakOnBehalf = async (clockEntryId, reason) => {
+  try {
+    const response = await apiClient.post(
+      `/api/clockentries/${clockEntryId}/breaks/start/on-behalf`,
+      reason ? { reason } : {}
+    );
+    return response.data;
+  } catch (error) {
+    console.error("API Error start break on behalf:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error starting break",
+    };
+  }
+};
+
+export const endBreakOnBehalf = async (clockEntryId, reason) => {
+  try {
+    const response = await apiClient.post(
+      `/api/clockentries/${clockEntryId}/breaks/end/on-behalf`,
+      reason ? { reason } : {}
+    );
+    return response.data;
+  } catch (error) {
+    console.error("API Error end break on behalf:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error ending break",
+    };
+  }
+};
+
