@@ -60,6 +60,25 @@ function AuthGate() {
       <Stack.Screen name="(app)" />
       <Stack.Screen name="(kiosk)" />
       <Stack.Screen
+        name="manager-attendance"
+        options={{
+          headerShown: true,
+          title: 'Live Attendance',
+          headerStyle: { backgroundColor: glassTheme.colors.background.primary },
+          headerTintColor: glassTheme.colors.text.primary,
+          headerTitleStyle: {
+            fontFamily: 'DMSans_600SemiBold',
+            fontWeight: '600',
+            fontSize: 17,
+            color: glassTheme.colors.text.primary,
+            letterSpacing: -0.3,
+          },
+          headerBackTitleVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
         name="edit-profile"
         options={{
           presentation: 'modal',
