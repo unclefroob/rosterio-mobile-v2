@@ -190,6 +190,61 @@ export const searchSwapCandidates = async (shiftId, q, limit) => {
 };
 
 /**
+ * Unavailability API
+ */
+export const createUnavailability = async (body) => {
+  try {
+    const response = await apiClient.post('/api/unavailability', body);
+    return response.data;
+  } catch (error) {
+    console.error('API Error creating unavailability:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error creating unavailability',
+    };
+  }
+};
+
+export const listMyUnavailability = async (opts = {}) => {
+  try {
+    const response = await apiClient.get('/api/unavailability/me', { params: opts });
+    return response.data;
+  } catch (error) {
+    console.error('API Error listing unavailability:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error fetching unavailability',
+    };
+  }
+};
+
+export const updateUnavailability = async (id, body) => {
+  try {
+    const response = await apiClient.patch(`/api/unavailability/${id}`, body);
+    return response.data;
+  } catch (error) {
+    console.error('API Error updating unavailability:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error updating unavailability',
+    };
+  }
+};
+
+export const deleteUnavailability = async (id) => {
+  try {
+    const response = await apiClient.delete(`/api/unavailability/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('API Error deleting unavailability:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error deleting unavailability',
+    };
+  }
+};
+
+/**
  * Profile API
  */
 export const updateProfile = async (profileData) => {

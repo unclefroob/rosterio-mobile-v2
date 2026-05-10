@@ -154,6 +154,20 @@ const ProfileScreen = () => {
 
           <View style={[styles.section, { marginTop: 4 }]}>
             <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => router.push('/shifts/unavailability')}
+              activeOpacity={0.75}
+              accessibilityLabel="Manage unavailability"
+              accessibilityRole="button"
+            >
+              <Ionicons name="calendar-outline" size={18} color={glassTheme.colors.primary} />
+              <Text style={styles.editButtonText}>Unavailability</Text>
+              <Ionicons name="chevron-forward" size={16} color={glassTheme.colors.text.tertiary} style={{ marginLeft: "auto" }} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.section, { marginTop: 4 }]}>
+            <TouchableOpacity
               style={styles.signOutButton}
               onPress={handleLogout}
               activeOpacity={0.8}
