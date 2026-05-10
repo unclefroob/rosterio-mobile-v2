@@ -1,8 +1,14 @@
 import React, { useEffect, useReducer } from "react";
+import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import apiClient from "../services/apiClient";
 import { API_URL } from "../config/api";
+import { registerForPushNotifications } from "../services/pushNotifications";
+import { registerPushToken, unregisterPushToken } from "../services/apiHelper";
+
+// Key used to persist the current Expo push token so we can unregister it on logout.
+const PUSH_TOKEN_KEY = "@rosterio:pushToken";
 
 export const AuthContext = React.createContext();
 
@@ -288,6 +294,17 @@ export function AuthContextProvider({ children }) {
             await AsyncStorage.setItem("refreshToken", refreshToken);
           }
 
+          // Helper: register push token silently after sign-in.
+          const _registerPushAfterSignIn = async () => {
+            try {
+              const pushToken = await registerForPushNotifications();
+              await AsyncStorage.setItem(PUSH_TOKEN_KEY, pushToken);
+              await registerPushToken(pushToken, Platform.OS).catch(() => {});
+            } catch (_) {
+              // Denied permission or simulator — never block sign-in
+            }
+          };
+
           // If backend auto-selected an account (single account), use it directly
           if (selectedAccount && role) {
             const accountId = selectedAccount.id || selectedAccount._id;
@@ -301,6 +318,7 @@ export function AuthContextProvider({ children }) {
                 role: role,
               },
             });
+            _registerPushAfterSignIn();
             return { success: true };
           }
 
@@ -341,6 +359,7 @@ export function AuthContextProvider({ children }) {
                       },
                     });
 
+                    _registerPushAfterSignIn();
                     console.log("✅ Auto-selected account:", account.name, "ID:", resolvedAccountId);
                     return { success: true };
                   }
@@ -455,6 +474,14 @@ export function AuthContextProvider({ children }) {
         }
       },
       signOut: async () => {
+        // Unregister push token BEFORE clearing auth tokens (request still has auth)
+        try {
+          const storedPushToken = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
+          if (storedPushToken) {
+            await unregisterPushToken(storedPushToken).catch(() => {});
+            await AsyncStorage.removeItem(PUSH_TOKEN_KEY);
+          }
+        } catch (_) {}
         try {
           // Call server logout endpoint (best-effort)
           await apiClient.post("/api/auth/logout").catch(() => {});

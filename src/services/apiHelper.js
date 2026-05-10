@@ -376,3 +376,106 @@ export const endBreakOnBehalf = async (clockEntryId, reason) => {
   }
 };
 
+/**
+ * Push Token API
+ */
+export const registerPushToken = async (deviceToken, platform) => {
+  try {
+    const response = await apiClient.post("/api/push-tokens", { deviceToken, platform });
+    return response.data;
+  } catch (error) {
+    console.error("API Error registering push token:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error registering push token",
+    };
+  }
+};
+
+export const unregisterPushToken = async (deviceToken) => {
+  try {
+    const response = await apiClient.delete(`/api/push-tokens/${encodeURIComponent(deviceToken)}`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error unregistering push token:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error unregistering push token",
+    };
+  }
+};
+
+/**
+ * Invite API
+ */
+export const getInviteByToken = async (accountId, token) => {
+  try {
+    const response = await apiClient.get(`/api/invites/${accountId}/${token}`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error fetching invite:", error);
+    return {
+      success: false,
+      status: error.response?.status,
+      message: error.response?.data?.message || "Error fetching invite",
+    };
+  }
+};
+
+export const acceptInvite = async (accountId, token) => {
+  try {
+    const response = await apiClient.post(`/api/invites/${accountId}/${token}/accept`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error accepting invite:", error);
+    return {
+      success: false,
+      status: error.response?.status,
+      message: error.response?.data?.message || "Error accepting invite",
+    };
+  }
+};
+
+export const declineInvite = async (accountId, token) => {
+  try {
+    const response = await apiClient.post(`/api/invites/${accountId}/${token}/decline`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error declining invite:", error);
+    return {
+      success: false,
+      status: error.response?.status,
+      message: error.response?.data?.message || "Error declining invite",
+    };
+  }
+};
+
+/**
+ * Notifications / Inbox API
+ */
+export const getMyNotifications = async (opts = {}) => {
+  try {
+    const response = await apiClient.get("/api/marketplace/notifications", { params: opts });
+    return response.data;
+  } catch (error) {
+    console.error("API Error fetching notifications:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error fetching notifications",
+    };
+  }
+};
+
+export const markNotificationRead = async (notificationId) => {
+  try {
+    const response = await apiClient.put(`/api/marketplace/notifications/${notificationId}/read`);
+    return response.data;
+  } catch (error) {
+    console.error("API Error marking notification read:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error marking notification read",
+    };
+  }
+};
+

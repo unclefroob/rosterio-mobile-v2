@@ -20,6 +20,14 @@ import { KioskContextProvider, useKiosk } from '../src/context/KioskContext';
 import { ToastProvider } from '../src/components/Toast';
 import SplashScreen from '../src/screens/SplashScreen';
 import glassTheme from '../src/theme/glassTheme';
+import {
+  setupNotificationHandlers,
+  addNotificationResponseListener,
+} from '../src/services/pushNotifications';
+
+// Configure foreground notification display behaviour once at module load.
+// This must run before the first notification can arrive.
+setupNotificationHandlers();
 
 function AuthGate() {
   const { state } = useAuth();
@@ -28,17 +36,36 @@ function AuthGate() {
   // A module-level variable would also work, but useRef is idiomatic React.
   const didResetOnLaunch = useRef(false);
 
+  // Register push notification tap handler — routes deep links from notification
+  // taps into the app. Runs once on mount, cleaned up on unmount.
+  useEffect(() => {
+    const cleanup = addNotificationResponseListener();
+    return cleanup;
+  }, []);
+
   useEffect(() => {
     if (state.isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const inKioskGroup = segments[0] === '(kiosk)';
+    // CRITICAL: never clobber a deep link that landed on /invites/...
+    // The invite detail screen handles its own auth guard and will redirect
+    // to login (with redirectTo) if needed.
+    const inInvitesGroup = segments[0] === 'invites';
     const isAuthenticated = state.isSignedIn && state.selectedAccount;
 
     // Don't redirect into (app) while a manager is over on /(kiosk)/pair
     // setting up a device — they navigated there explicitly from the auth
     // screen and haven't logged in.
     if (inKioskGroup) return;
+
+    // Let the invite detail screen handle its own auth redirect flow.
+    // Mark didResetOnLaunch so a subsequent navigate-to-/(app)/inbox after
+    // accept doesn't trigger the cold-start reset and clobber it back to home.
+    if (inInvitesGroup) {
+      if (isAuthenticated) didResetOnLaunch.current = true;
+      return;
+    }
 
     if (isAuthenticated && (inAuthGroup || !didResetOnLaunch.current)) {
       didResetOnLaunch.current = true;
@@ -50,7 +77,7 @@ function AuthGate() {
         router.replace('/(auth)/login');
       }
     }
-  }, [state.isLoading, state.isSignedIn, state.selectedAccount]);
+  }, [state.isLoading, state.isSignedIn, state.selectedAccount, segments]);
 
   if (state.isLoading) return <SplashScreen />;
 
@@ -59,6 +86,7 @@ function AuthGate() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(app)" />
       <Stack.Screen name="(kiosk)" />
+      <Stack.Screen name="invites" />
       <Stack.Screen
         name="manager-attendance"
         options={{

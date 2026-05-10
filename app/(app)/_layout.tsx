@@ -32,6 +32,11 @@ export default function AppLayout() {
         <NativeTabs.Trigger.Icon sf={{ default: 'calendar', selected: 'calendar.fill' }} />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="inbox">
+        <NativeTabs.Trigger.Label>Inbox</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'tray', selected: 'tray.fill' }} />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="profile">
         <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'person.circle', selected: 'person.circle.fill' }} />

@@ -18,7 +18,7 @@ import { GlassView, isLiquidGlassAvailable } from "../../utils/glassEffect";
 import { useAuth } from "../../context/AuthContext";
 import glassTheme from "../../theme/glassTheme";
 import { useNavigation } from "@react-navigation/native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 let BlurView;
 try { BlurView = require("expo-blur").BlurView; } catch (e) { BlurView = null; }
@@ -26,6 +26,9 @@ try { BlurView = require("expo-blur").BlurView; } catch (e) { BlurView = null; }
 const LoginScreen = () => {
   const navigation = useNavigation();
   const { signIn } = useAuth();
+  // redirectTo is set when the user was bounced here from a deep link that
+  // requires auth (e.g. /invites/{accountId}/{token}).
+  const { redirectTo } = useLocalSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +47,17 @@ const LoginScreen = () => {
           "Sign In Failed",
           result.error || "Unable to connect to server. Please check your connection."
         );
+      } else if (
+        redirectTo &&
+        typeof redirectTo === "string" &&
+        // Allow-list: only deep-link destinations we trust may be navigated to
+        // post-login. Prevents a malicious link like `?redirectTo=/(app)/admin`
+        // from bouncing an unauthenticated user into a privileged screen.
+        redirectTo.startsWith("/invites/")
+      ) {
+        router.replace(redirectTo);
       }
+      // If no redirectTo, AuthGate in _layout.tsx will handle the redirect to /(app).
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Sign In Error", "An unexpected error occurred. Please try again.");

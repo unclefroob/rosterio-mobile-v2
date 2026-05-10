@@ -22,7 +22,10 @@
         "NSLocationWhenInUseUsageDescription": "Rosterio uses your location to verify check-in and check-out at shift locations.",
         "NSCameraUsageDescription": "Scan kiosk pairing QR code to set up the kiosk",
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "associatedDomains": [
+        "applinks:app.rosterio.app"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -35,13 +38,41 @@
         "ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "app.rosterio.app",
+              "pathPrefix": "/invites"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ]
     },
     "plugins": [
       "expo-router",
       "expo-asset",
       "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#111111",
+          "defaultChannel": "default",
+          "sounds": [],
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
       [
         "expo-location",
         {
