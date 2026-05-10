@@ -218,6 +218,19 @@ export const listMyUnavailability = async (opts = {}) => {
   }
 };
 
+export const getUnavailability = async (id) => {
+  try {
+    const response = await apiClient.get(`/api/unavailability/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('API Error fetching unavailability by id:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error fetching unavailability',
+    };
+  }
+};
+
 export const updateUnavailability = async (id, body) => {
   try {
     const response = await apiClient.patch(`/api/unavailability/${id}`, body);

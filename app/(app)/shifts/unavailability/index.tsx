@@ -138,11 +138,7 @@ export default function UnavailabilityListScreen() {
     if (result.success === false) {
       setError(result.message || 'Failed to load unavailability');
     } else {
-      const records: UnavailabilityRecord[] = Array.isArray(result.data)
-        ? result.data
-        : Array.isArray(result)
-        ? result
-        : [];
+      const records: UnavailabilityRecord[] = Array.isArray(result.data) ? result.data : [];
       setItems(records);
     }
 

@@ -18,7 +18,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { format } from 'date-fns';
 import { ColorValue } from 'react-native';
 import {
-  listMyUnavailability,
+  getUnavailability,
   updateUnavailability,
   deleteUnavailability,
 } from '../../../../src/services/apiHelper';
@@ -65,29 +65,19 @@ export default function EditUnavailabilityScreen() {
   useEffect(() => {
     const fetchRecord = async () => {
       setLoading(true);
-      const result = await listMyUnavailability();
+      const result = await getUnavailability(id as string);
 
-      if (result.success === false) {
+      if (result.success === false || !result.data) {
         setNotFound(true);
         setLoading(false);
         return;
       }
 
-      const records = Array.isArray(result.data)
-        ? result.data
-        : Array.isArray(result)
-        ? result
-        : [];
-      const record = records.find((r: { _id: string }) => r._id === id);
-
-      if (!record) {
-        setNotFound(true);
-      } else {
-        setDateFrom(new Date(record.dateFrom));
-        setDateTo(new Date(record.dateTo));
-        setCategory(record.category as Category);
-        setNotes(record.notes || '');
-      }
+      const record = result.data;
+      setDateFrom(new Date(record.dateFrom));
+      setDateTo(new Date(record.dateTo));
+      setCategory(record.category as Category);
+      setNotes(record.notes || '');
       setLoading(false);
     };
 
