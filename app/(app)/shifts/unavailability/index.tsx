@@ -33,8 +33,14 @@ type UnavailabilityRecord = {
   dateTo: string;
   category: 'annual_leave' | 'sick' | 'personal' | 'unavailable';
   notes?: string;
+  /** True when the row is really a leave request, surfaced by the API's
+   *  backwards-compatible listing. Those belong on the Leave screen. */
+  isLeaveRequest?: boolean;
 };
 
+// The leave categories remain in the type because the API's compatibility
+// listing can still return them for records created by older app builds. They
+// are filtered out of this screen — see loadData.
 const CATEGORY_LABELS: Record<UnavailabilityRecord['category'], string> = {
   annual_leave: 'Annual Leave',
   sick: 'Sick',
@@ -138,7 +144,12 @@ export default function UnavailabilityListScreen() {
     if (result.success === false) {
       setError(result.message || 'Failed to load unavailability');
     } else {
-      const records: UnavailabilityRecord[] = Array.isArray(result.data) ? result.data : [];
+      // Leave rows come back from this endpoint too, for old app builds. This
+      // screen is availability only; leave has its own screen with balances and
+      // an approval status, which is a much better place to see it.
+      const records: UnavailabilityRecord[] = (
+        Array.isArray(result.data) ? result.data : []
+      ).filter((r: UnavailabilityRecord) => !r.isLeaveRequest);
       setItems(records);
     }
 
@@ -174,12 +185,12 @@ export default function UnavailabilityListScreen() {
           >
             <Ionicons name="chevron-back" size={26} color={glassTheme.colors.primary} />
           </TouchableOpacity>
-          <Text style={styles.screenTitle}>My Unavailability</Text>
+          <Text style={styles.screenTitle}>My Availability</Text>
           <TouchableOpacity
             style={styles.newBtn}
             onPress={() => router.push('/shifts/unavailability/new')}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            accessibilityLabel="Log new unavailability"
+            accessibilityLabel="Add unavailability"
             accessibilityRole="button"
           >
             <Ionicons name="add" size={24} color={glassTheme.colors.primary} />
@@ -222,7 +233,7 @@ export default function UnavailabilityListScreen() {
               <View style={styles.emptyContainer}>
                 <Ionicons name="calendar-outline" size={48} color={glassTheme.colors.text.tertiary} />
                 <Text style={styles.emptyTitle}>Nothing logged yet</Text>
-                <Text style={styles.emptySubtitle}>Add your first unavailability</Text>
+                <Text style={styles.emptySubtitle}>Tell your manager when you cannot work</Text>
                 <TouchableOpacity
                   style={styles.emptyBtn}
                   onPress={() => router.push('/shifts/unavailability/new')}

@@ -152,16 +152,33 @@ const ProfileScreen = () => {
             </TouchableOpacity>
           </View>
 
+          {/* Leave and availability are separate entries on purpose. Leave
+              draws on a balance and needs approval; availability is just
+              telling your manager when you cannot work. */}
+          <View style={[styles.section, { marginTop: 4 }]}>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => router.push('/shifts/leave')}
+              activeOpacity={0.75}
+              accessibilityLabel="My leave"
+              accessibilityRole="button"
+            >
+              <Ionicons name="airplane-outline" size={18} color={glassTheme.colors.primary} />
+              <Text style={styles.editButtonText}>Leave</Text>
+              <Ionicons name="chevron-forward" size={16} color={glassTheme.colors.text.tertiary} style={{ marginLeft: "auto" }} />
+            </TouchableOpacity>
+          </View>
+
           <View style={[styles.section, { marginTop: 4 }]}>
             <TouchableOpacity
               style={styles.editButton}
               onPress={() => router.push('/shifts/unavailability')}
               activeOpacity={0.75}
-              accessibilityLabel="Manage unavailability"
+              accessibilityLabel="Manage availability"
               accessibilityRole="button"
             >
               <Ionicons name="calendar-outline" size={18} color={glassTheme.colors.primary} />
-              <Text style={styles.editButtonText}>Unavailability</Text>
+              <Text style={styles.editButtonText}>Availability</Text>
               <Ionicons name="chevron-forward" size={16} color={glassTheme.colors.text.tertiary} style={{ marginLeft: "auto" }} />
             </TouchableOpacity>
           </View>

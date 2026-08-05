@@ -26,21 +26,15 @@ import { DateField } from '../../../../src/components/DateField';
 import { toast } from '../../../../src/components/Toast';
 import glassTheme from '../../../../src/theme/glassTheme';
 
+/**
+ * Editing an availability record.
+ *
+ * The category picker is gone: `unavailable` is the only category this screen
+ * writes. Records created by older app builds may still carry a leave category,
+ * so the state keeps the wider type and the save preserves whatever came back
+ * rather than silently reclassifying someone's historic leave.
+ */
 type Category = 'annual_leave' | 'sick' | 'personal' | 'unavailable';
-
-const CATEGORIES: { value: Category; label: string }[] = [
-  { value: 'annual_leave', label: 'Annual Leave' },
-  { value: 'sick', label: 'Sick' },
-  { value: 'personal', label: 'Personal' },
-  { value: 'unavailable', label: 'Unavailable' },
-];
-
-const CATEGORY_COLORS: Record<Category, string> = {
-  annual_leave: '#5856D6',
-  sick: '#FF9F0A',
-  personal: '#AF52DE',
-  unavailable: '#8E8E93',
-};
 
 const todayMidnight = () => {
   const d = new Date();
@@ -58,7 +52,7 @@ export default function EditUnavailabilityScreen() {
 
   const [dateFrom, setDateFrom] = useState<Date>(today);
   const [dateTo, setDateTo] = useState<Date>(today);
-  const [category, setCategory] = useState<Category>('annual_leave');
+  const [category, setCategory] = useState<Category>('unavailable');
   const [notes, setNotes] = useState('');
   const [notFound, setNotFound] = useState(false);
 
@@ -76,6 +70,9 @@ export default function EditUnavailabilityScreen() {
       const record = result.data;
       setDateFrom(new Date(record.dateFrom));
       setDateTo(new Date(record.dateTo));
+      // Loaded but not editable. Keeping the record's own category means
+      // editing the notes on a pre-split record does not silently reclassify
+      // someone's historic leave as plain availability.
       setCategory(record.category as Category);
       setNotes(record.notes || '');
       setLoading(false);
@@ -235,41 +232,25 @@ export default function EditUnavailabilityScreen() {
               />
             </View>
 
-            {/* Category */}
-            <Text style={styles.sectionLabel}>Category</Text>
-            <View style={styles.card}>
-              <View style={styles.categoryGrid}>
-                {CATEGORIES.map((cat) => {
-                  const selected = category === cat.value;
-                  const color = CATEGORY_COLORS[cat.value];
-                  return (
-                    <TouchableOpacity
-                      key={cat.value}
-                      style={[
-                        styles.categoryChip,
-                        selected && {
-                          backgroundColor: color + '22',
-                          borderColor: color,
-                        },
-                      ]}
-                      onPress={() => setCategory(cat.value)}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected }}
-                      accessibilityLabel={cat.label}
-                    >
-                      <Text
-                        style={[
-                          styles.categoryChipText,
-                          selected && { color, fontWeight: '700' },
-                        ]}
-                      >
-                        {cat.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
+            {/* Leave has its own screen, with a balance and an approval
+                step. Editing a historic leave record here would leave it
+                unapproved and undeducted. */}
+            <TouchableOpacity
+              style={styles.leaveHint}
+              onPress={() => router.replace('/shifts/leave')}
+              accessibilityRole="button"
+              accessibilityLabel="Go to leave"
+            >
+              <Ionicons name="airplane-outline" size={18} color={glassTheme.colors.primary} />
+              <Text style={styles.leaveHintText}>
+                Annual, sick and other leave now live on the Leave screen.
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={glassTheme.colors.text.tertiary}
+              />
+            </TouchableOpacity>
 
             {/* Notes */}
             <Text style={styles.sectionLabel}>Notes (optional)</Text>
@@ -329,6 +310,17 @@ export default function EditUnavailabilityScreen() {
 }
 
 const styles = StyleSheet.create({
+  leaveHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: glassTheme.spacing.sm,
+    backgroundColor: '#EEF3F8',
+    borderRadius: glassTheme.radius.medium,
+    padding: glassTheme.spacing.md,
+    marginTop: glassTheme.spacing.md,
+  },
+  leaveHintText: { flex: 1, fontSize: 12, color: '#3A4A5A', lineHeight: 17 },
+
   bg: { flex: 1 },
   safeArea: { flex: 1 },
   flex: { flex: 1 },
@@ -383,25 +375,6 @@ const styles = StyleSheet.create({
     marginVertical: glassTheme.spacing.md,
   },
 
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: glassTheme.spacing.sm,
-  },
-  categoryChip: {
-    paddingHorizontal: glassTheme.spacing.md,
-    paddingVertical: glassTheme.spacing.sm,
-    borderRadius: glassTheme.radius.pill,
-    borderWidth: 1,
-    borderColor: glassTheme.border.color,
-    backgroundColor: glassTheme.colors.background.tertiary,
-  },
-  categoryChipText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: glassTheme.colors.text.secondary,
-    fontFamily: glassTheme.typography.fontFamily.medium,
-  },
 
   notesInput: {
     fontSize: 15,

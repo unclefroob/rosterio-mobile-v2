@@ -190,6 +190,86 @@ export const searchSwapCandidates = async (shiftId, q, limit) => {
 };
 
 /**
+ * Leave API
+ *
+ * Distinct from the unavailability endpoints below. Unavailability says "I
+ * cannot work then" and takes effect immediately; a leave request draws on an
+ * accrued balance and does nothing until a manager approves it.
+ */
+
+const leaveError = (error, fallback) => ({
+  success: false,
+  message: error.response?.data?.message || fallback,
+});
+
+/**
+ * Leave types the signed-in worker is eligible for.
+ *
+ * Server-driven rather than a hardcoded list, so an employer adding a leave
+ * type under their agreement does not need an app release.
+ */
+export const getLeaveTypes = async () => {
+  try {
+    const response = await apiClient.get('/api/leave/types');
+    return response.data;
+  } catch (error) {
+    return leaveError(error, 'Error fetching leave types');
+  }
+};
+
+/** Current balances, plus how recently leave last accrued. */
+export const getMyLeaveBalances = async () => {
+  try {
+    const response = await apiClient.get('/api/leave/balances');
+    return response.data;
+  } catch (error) {
+    return leaveError(error, 'Error fetching leave balances');
+  }
+};
+
+export const listMyLeaveRequests = async (params = {}) => {
+  try {
+    const response = await apiClient.get('/api/leave/requests/me', { params });
+    return response.data;
+  } catch (error) {
+    return leaveError(error, 'Error fetching leave requests');
+  }
+};
+
+/**
+ * Per-day hours for a proposed range, without saving anything. Lets the form
+ * show what will actually be deducted — including a public holiday that is not
+ * deducted at all — before the worker commits.
+ */
+export const previewLeaveRequest = async (body) => {
+  try {
+    const response = await apiClient.post('/api/leave/requests/preview', body);
+    return response.data;
+  } catch (error) {
+    return leaveError(error, 'Error previewing leave');
+  }
+};
+
+export const createLeaveRequest = async (body) => {
+  try {
+    const response = await apiClient.post('/api/leave/requests', body);
+    return response.data;
+  } catch (error) {
+    return leaveError(error, 'Error submitting leave request');
+  }
+};
+
+/** Pull back a request that has not been decided yet. */
+export const withdrawLeaveRequest = async (id) => {
+  try {
+    const response = await apiClient.post(`/api/leave/requests/${id}/withdraw`);
+    return response.data;
+  } catch (error) {
+    return leaveError(error, 'Error withdrawing leave request');
+  }
+};
+
+/**
  * Unavailability API
  */
 export const createUnavailability = async (body) => {

@@ -22,21 +22,15 @@ import { DateField } from '../../../../src/components/DateField';
 import { toast } from '../../../../src/components/Toast';
 import glassTheme from '../../../../src/theme/glassTheme';
 
-type Category = 'annual_leave' | 'sick' | 'personal' | 'unavailable';
-
-const CATEGORIES: { value: Category; label: string }[] = [
-  { value: 'annual_leave', label: 'Annual Leave' },
-  { value: 'sick', label: 'Sick' },
-  { value: 'personal', label: 'Personal' },
-  { value: 'unavailable', label: 'Unavailable' },
-];
-
-const CATEGORY_COLORS: Record<Category, string> = {
-  annual_leave: '#5856D6',
-  sick: '#FF9F0A',
-  personal: '#AF52DE',
-  unavailable: '#8E8E93',
-};
+/**
+ * Availability, not leave.
+ *
+ * Telling your manager you cannot work a day carries no balance and needs no
+ * approval. Paid entitlements moved to the Leave screens, which have a type
+ * picker, a balance and an approval step. The two used to share this form and
+ * they are genuinely different things.
+ */
+type Category = 'unavailable';
 
 const todayMidnight = () => {
   const d = new Date();
@@ -49,7 +43,7 @@ export default function NewUnavailabilityScreen() {
 
   const [dateFrom, setDateFrom] = useState<Date>(today);
   const [dateTo, setDateTo] = useState<Date>(today);
-  const [category, setCategory] = useState<Category>('annual_leave');
+  const [category] = useState<Category>('unavailable');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -122,7 +116,7 @@ export default function NewUnavailabilityScreen() {
             >
               <Ionicons name="chevron-back" size={26} color={glassTheme.colors.primary} />
             </TouchableOpacity>
-            <Text style={styles.screenTitle}>Log Unavailability</Text>
+            <Text style={styles.screenTitle}>Add Unavailability</Text>
             <View style={styles.headerRight} />
           </View>
 
@@ -153,41 +147,25 @@ export default function NewUnavailabilityScreen() {
               />
             </View>
 
-            {/* Category */}
-            <Text style={styles.sectionLabel}>Category</Text>
-            <View style={styles.card}>
-              <View style={styles.categoryGrid}>
-                {CATEGORIES.map((cat) => {
-                  const selected = category === cat.value;
-                  const color = CATEGORY_COLORS[cat.value];
-                  return (
-                    <TouchableOpacity
-                      key={cat.value}
-                      style={[
-                        styles.categoryChip,
-                        selected && {
-                          backgroundColor: color + '22',
-                          borderColor: color,
-                        },
-                      ]}
-                      onPress={() => setCategory(cat.value)}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected }}
-                      accessibilityLabel={cat.label}
-                    >
-                      <Text
-                        style={[
-                          styles.categoryChipText,
-                          selected && { color, fontWeight: '700' },
-                        ]}
-                      >
-                        {cat.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
+            {/* Leave lives elsewhere. Saying so here stops someone logging
+                annual leave as availability and never getting it approved. */}
+            <TouchableOpacity
+              style={styles.leaveHint}
+              onPress={() => router.replace('/shifts/leave/new')}
+              accessibilityRole="button"
+              accessibilityLabel="Request leave instead"
+            >
+              <Ionicons name="airplane-outline" size={18} color={glassTheme.colors.primary} />
+              <Text style={styles.leaveHintText}>
+                Taking annual, sick or other leave? Request it from the Leave
+                screen so it is approved and drawn from your balance.
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={glassTheme.colors.text.tertiary}
+              />
+            </TouchableOpacity>
 
             {/* Notes */}
             <Text style={styles.sectionLabel}>Notes (optional)</Text>
@@ -229,6 +207,17 @@ export default function NewUnavailabilityScreen() {
 }
 
 const styles = StyleSheet.create({
+  leaveHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: glassTheme.spacing.sm,
+    backgroundColor: '#EEF3F8',
+    borderRadius: glassTheme.radius.medium,
+    padding: glassTheme.spacing.md,
+    marginTop: glassTheme.spacing.md,
+  },
+  leaveHintText: { flex: 1, fontSize: 12, color: '#3A4A5A', lineHeight: 17 },
+
   bg: { flex: 1 },
   safeArea: { flex: 1 },
   flex: { flex: 1 },
@@ -282,25 +271,6 @@ const styles = StyleSheet.create({
     marginVertical: glassTheme.spacing.md,
   },
 
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: glassTheme.spacing.sm,
-  },
-  categoryChip: {
-    paddingHorizontal: glassTheme.spacing.md,
-    paddingVertical: glassTheme.spacing.sm,
-    borderRadius: glassTheme.radius.pill,
-    borderWidth: 1,
-    borderColor: glassTheme.border.color,
-    backgroundColor: glassTheme.colors.background.tertiary,
-  },
-  categoryChipText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: glassTheme.colors.text.secondary,
-    fontFamily: glassTheme.typography.fontFamily.medium,
-  },
 
   notesInput: {
     fontSize: 15,

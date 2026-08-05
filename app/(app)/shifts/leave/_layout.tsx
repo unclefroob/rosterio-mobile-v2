@@ -19,29 +19,19 @@ const COMMON_SCREEN_OPTIONS = {
   headerTitleStyle: HEADER_TITLE_STYLE,
 };
 
-export default function UnavailabilityLayout() {
+export default function LeaveLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="index"
-        options={{
-          ...COMMON_SCREEN_OPTIONS,
-          title: 'My Availability',
-        }}
+        options={{ ...COMMON_SCREEN_OPTIONS, title: 'My Leave' }}
       />
       <Stack.Screen
         name="new"
         options={{
           ...COMMON_SCREEN_OPTIONS,
-          title: 'Add Unavailability',
+          title: 'Request Leave',
           presentation: 'modal',
-        }}
-      />
-      <Stack.Screen
-        name="[id]"
-        options={{
-          ...COMMON_SCREEN_OPTIONS,
-          title: 'Edit Unavailability',
         }}
       />
     </Stack>
