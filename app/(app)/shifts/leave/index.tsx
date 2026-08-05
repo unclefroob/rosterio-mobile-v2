@@ -173,7 +173,7 @@ const RequestRow = ({
 export default function LeaveScreen() {
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
-  const [accrualStale, setAccrualStale] = useState(false);
+  const [balanceIncomplete, setBalanceIncomplete] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -192,7 +192,7 @@ export default function LeaveScreen() {
       setError(balanceRes.message || 'Failed to load leave');
     } else {
       setBalances(balanceRes.data?.balances || []);
-      setAccrualStale(Boolean(balanceRes.data?.accrual?.isStale));
+      setBalanceIncomplete(Boolean(balanceRes.data?.accrual?.isStale));
     }
 
     if (requestRes.success !== false) {
@@ -291,14 +291,16 @@ export default function LeaveScreen() {
               />
             }
           >
-            {/* A stale accrual means the balances below are out of date. Saying
-                so is better than showing a confident wrong number. */}
-            {accrualStale && (
+            {/* Accrual catches up whenever these balances are read, so being
+                current is not something to announce. This fires only when the
+                catch-up could not reconstruct the whole history, which means
+                the figures below UNDERSTATE what has actually been accrued. */}
+            {balanceIncomplete && (
               <View style={styles.warningBanner}>
                 <Ionicons name="alert-circle-outline" size={18} color="#8A6100" />
                 <Text style={styles.warningText}>
-                  Your balances may be out of date. Leave has not accrued
-                  recently — check with your manager.
+                  These balances are incomplete and may be lower than what you
+                  have actually accrued. Ask your manager to check.
                 </Text>
               </View>
             )}
