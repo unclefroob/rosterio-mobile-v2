@@ -61,6 +61,22 @@ const todayMidnight = () => {
 
 const toISODate = (d: Date) => format(d, 'yyyy-MM-dd');
 
+/**
+ * FW Act s67(3)'s three cases, in the worker's words.
+ *
+ * The value is what the Act keys on and the label is what somebody requesting
+ * leave would recognise. Paired here rather than mapped at two call sites so a
+ * wording change cannot drift from the value it sends.
+ */
+const PARENTAL_KINDS: Array<{
+  value: 'birth_before' | 'birth_after' | 'adoption';
+  label: string;
+}> = [
+  { value: 'birth_before', label: 'Starting before the birth' },
+  { value: 'birth_after', label: 'Starting after the birth' },
+  { value: 'adoption', label: 'For an adoption' },
+];
+
 export default function NewLeaveRequestScreen() {
   const today = todayMidnight();
 
@@ -81,6 +97,29 @@ export default function NewLeaveRequestScreen() {
   const [saving, setSaving] = useState(false);
 
   const selectedType = types.find((t) => t._id === selectedTypeId) || null;
+
+  /*
+   * FW Act Division 5, asked only when the chosen type is parental leave.
+   *
+   * `parentalKind` is not a formality. s67(3) fixes the date the twelve months
+   * of qualifying service is counted to, and for leave starting BEFORE the
+   * birth that date is the expected date of birth — later than the leave's
+   * start and often later than today. Somebody eleven months into a job with a
+   * baby due in two months IS entitled, and a system counting to the day they
+   * asked would tell them they are not.
+   */
+  const isParental = selectedType?.code === 'parental';
+  const [parentalKind, setParentalKind] =
+    useState<'birth_before' | 'birth_after' | 'adoption'>('birth_before');
+  const [expectedDob, setExpectedDob] = useState<Date | null>(null);
+  /*
+   * Null on purpose. An unticked checkbox cannot be told apart from a question
+   * nobody read, and s70(b) is a limb of the entitlement — so the answer is
+   * required rather than defaulted, and Send stays disabled until it is given.
+   */
+  const [responsibleForCare, setResponsibleForCare] = useState<boolean | null>(
+    null
+  );
 
   useEffect(() => {
     (async () => {
@@ -130,6 +169,14 @@ export default function NewLeaveRequestScreen() {
       );
       return;
     }
+    // s70(b) is a limb of the entitlement, so an unanswered question here would
+    // land on the manager as a gap rather than as a decision.
+    if (isParental && responsibleForCare === null) {
+      toast.error(
+        'Say whether you will have responsibility for the child\'s care.'
+      );
+      return;
+    }
 
     setSaving(true);
     const res = await createLeaveRequest({
@@ -137,6 +184,19 @@ export default function NewLeaveRequestScreen() {
       dateFrom: toISODate(dateFrom),
       dateTo: toISODate(dateTo),
       reason: reason.trim() || undefined,
+      // Sent only for parental leave. The API keys the block to the leave type
+      // and drops it for anything else, so this is clarity rather than safety.
+      ...(isParental
+        ? {
+            parentalLeave: {
+              kind: parentalKind,
+              ...(parentalKind === 'birth_before' && expectedDob
+                ? { expectedDateOfBirth: toISODate(expectedDob) }
+                : {}),
+              responsibleForCare: responsibleForCare === true,
+            },
+          }
+        : {}),
     });
     setSaving(false);
 
@@ -244,6 +304,86 @@ export default function NewLeaveRequestScreen() {
                   Your manager may ask for evidence for this leave.
                 </Text>
               </View>
+            )}
+
+            {/* The questions the NES turns on, asked here rather than left for
+                a manager to chase afterwards. Without them nobody can say
+                whether this leave is an entitlement at all. */}
+            {isParental && (
+              <>
+                <Text style={styles.sectionLabel}>About this leave</Text>
+                <View style={styles.card}>
+                  {PARENTAL_KINDS.map(({ value, label }) => (
+                    <TouchableOpacity
+                      key={value}
+                      style={styles.choiceRow}
+                      onPress={() => setParentalKind(value)}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: parentalKind === value }}
+                    >
+                      <Ionicons
+                        name={
+                          parentalKind === value
+                            ? 'radio-button-on'
+                            : 'radio-button-off'
+                        }
+                        size={20}
+                        color="#3A4A5A"
+                      />
+                      <Text style={styles.choiceLabel}>{label}</Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  {parentalKind === 'birth_before' && (
+                    <>
+                      <View style={styles.divider} />
+                      <DateField
+                        label="Expected date of birth"
+                        value={expectedDob ?? dateFrom}
+                        onChange={(d) => setExpectedDob(d)}
+                      />
+                      {/* Why the field is worth the tap. */}
+                      <Text style={styles.helpText}>
+                        Your twelve months of service is counted to this date,
+                        not to today.
+                      </Text>
+                    </>
+                  )}
+
+                  <View style={styles.divider} />
+                  <Text style={styles.choiceLabel}>
+                    Will you have responsibility for the child&apos;s care?
+                  </Text>
+                  {([true, false] as const).map((value) => (
+                    <TouchableOpacity
+                      key={String(value)}
+                      style={styles.choiceRow}
+                      onPress={() => setResponsibleForCare(value)}
+                      accessibilityRole="radio"
+                      accessibilityState={{
+                        selected: responsibleForCare === value,
+                      }}
+                    >
+                      <Ionicons
+                        name={
+                          responsibleForCare === value
+                            ? 'radio-button-on'
+                            : 'radio-button-off'
+                        }
+                        size={20}
+                        color="#3A4A5A"
+                      />
+                      <Text style={styles.choiceLabel}>
+                        {value ? 'Yes' : 'No'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                  <Text style={styles.helpText}>
+                    The National Employment Standards make this part of the
+                    entitlement, so it has to be answered either way.
+                  </Text>
+                </View>
+              </>
             )}
 
             <Text style={styles.sectionLabel}>Dates</Text>
@@ -392,6 +532,25 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.07)',
     marginVertical: glassTheme.spacing.sm,
+  },
+
+  // The Division 5 questions. A row is a whole tap target rather than just the
+  // control, because these get answered one-handed on a phone.
+  choiceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: glassTheme.spacing.sm,
+    paddingVertical: glassTheme.spacing.sm,
+  },
+  choiceLabel: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1E2A38',
+  },
+  helpText: {
+    fontSize: 12,
+    color: '#5A6A7A',
+    marginTop: 2,
   },
 
   typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: glassTheme.spacing.sm },
